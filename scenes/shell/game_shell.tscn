@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/game_shell.gd" id="1_shell"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/StatusBadge.tscn" id="2_statusbadge"]
 
 [node name="GameShell" type="Control"]
 layout_mode = 3
@@ -18,153 +19,220 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.09, 0.129, 0.169, 1)
+color = Color(0.078431375, 0.09019608, 0.101960786, 1)
 
-[node name="Rows" type="HBoxContainer" parent="."]
+[node name="Root" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 0
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
-[node name="LeftNav" type="PanelContainer" parent="Rows"]
-custom_minimum_size = Vector2(232, 0)
+[node name="Rows" type="HBoxContainer" parent="Root"]
 layout_mode = 2
+theme_override_constants/separation = 12
 
-[node name="NavBox" type="VBoxContainer" parent="Rows/LeftNav"]
+[node name="LeftNav" type="PanelContainer" parent="Root/Rows"]
+custom_minimum_size = Vector2(236, 0)
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_type_variation = &"NavPanel"
 
-[node name="Brand" type="Label" parent="Rows/LeftNav/NavBox"]
+[node name="NavBox" type="VBoxContainer" parent="Root/Rows/LeftNav"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Brand" type="Label" parent="Root/Rows/LeftNav/NavBox"]
 layout_mode = 2
 theme_type_variation = &"Title"
-text = "MX-Idle"
+text = "MX-IDLE"
 
-[node name="NavHome" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="BrandSub" type="Label" parent="Root/Rows/LeftNav/NavBox"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+text = "MEDIEVAL IDLE RPG"
+
+[node name="Sep1" type="HSeparator" parent="Root/Rows/LeftNav/NavBox"]
+layout_mode = 2
+
+[node name="SectionWorld" type="Label" parent="Root/Rows/LeftNav/NavBox"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+text = "ACTIVITIES"
+
+[node name="NavHome" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Home"
 alignment = 0
 
-[node name="NavMining" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="NavMining" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Mining"
 alignment = 0
 
-[node name="NavSmithing" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="NavSmithing" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Smithing"
 alignment = 0
 
-[node name="NavFishing" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="NavFishing" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Fishing"
 alignment = 0
 
-[node name="NavCooking" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="NavCooking" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Cooking"
 alignment = 0
 
-[node name="NavCombat" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="NavCombat" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Combat"
 alignment = 0
 
-[node name="NavBank" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="SectionInv" type="Label" parent="Root/Rows/LeftNav/NavBox"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+text = "CHARACTER"
+
+[node name="NavBank" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Bank"
 alignment = 0
 
-[node name="NavEquipment" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="NavEquipment" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Equipment"
 alignment = 0
 
-[node name="NavSettings" type="Button" parent="Rows/LeftNav/NavBox"]
+[node name="NavSettings" type="Button" parent="Root/Rows/LeftNav/NavBox"]
 unique_name_in_owner = true
 layout_mode = 2
+toggle_mode = true
 theme_type_variation = &"NavButton"
 text = "Settings"
 alignment = 0
 
-[node name="Spacer" type="Control" parent="Rows/LeftNav/NavBox"]
+[node name="Spacer" type="Control" parent="Root/Rows/LeftNav/NavBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="NavCharacters" type="Button" parent="Rows/LeftNav/NavBox"]
-unique_name_in_owner = true
+[node name="ProfileCard" type="PanelContainer" parent="Root/Rows/LeftNav/NavBox"]
 layout_mode = 2
-theme_type_variation = &"NavButton"
-text = "Characters"
-alignment = 0
+theme_type_variation = &"PanelInset"
 
-[node name="ProfileLabel" type="Label" parent="Rows/LeftNav/NavBox"]
+[node name="PBox" type="VBoxContainer" parent="Root/Rows/LeftNav/NavBox/ProfileCard"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="PCaption" type="Label" parent="Root/Rows/LeftNav/NavBox/ProfileCard/PBox"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+text = "PLAYING AS"
+
+[node name="ProfileLabel" type="Label" parent="Root/Rows/LeftNav/NavBox/ProfileCard/PBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"Muted"
 text = "Adventurer"
 
-[node name="Content" type="VBoxContainer" parent="Rows"]
+[node name="NavCharacters" type="Button" parent="Root/Rows/LeftNav/NavBox/ProfileCard/PBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"GhostButton"
+text = "Switch character"
+alignment = 0
+
+[node name="Content" type="VBoxContainer" parent="Root/Rows"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="PanelContainer" parent="Root/Rows/Content"]
+layout_mode = 2
+theme_type_variation = &"TopBar"
+
+[node name="TopRow" type="HBoxContainer" parent="Root/Rows/Content/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleBlock" type="VBoxContainer" parent="Root/Rows/Content/TopBar/TopRow"]
+layout_mode = 2
+size_flags_vertical = 4
 theme_override_constants/separation = 0
 
-[node name="TopBar" type="PanelContainer" parent="Rows/Content"]
-custom_minimum_size = Vector2(0, 62)
-layout_mode = 2
-
-[node name="TopRow" type="HBoxContainer" parent="Rows/Content/TopBar"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="ScreenTitle" type="Label" parent="Rows/Content/TopBar/TopRow"]
+[node name="ScreenTitle" type="Label" parent="Root/Rows/Content/TopBar/TopRow/TitleBlock"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Title"
 text = "Home"
 
-[node name="TopSpacer" type="Control" parent="Rows/Content/TopBar/TopRow"]
+[node name="ScreenSubtitle" type="Label" parent="Root/Rows/Content/TopBar/TopRow/TitleBlock"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = ""
+
+[node name="TopSpacer" type="Control" parent="Root/Rows/Content/TopBar/TopRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="GoldLabel" type="Label" parent="Rows/Content/TopBar/TopRow"]
+[node name="ActivityBadge" parent="Root/Rows/Content/TopBar/TopRow" instance=ExtResource("2_statusbadge")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="GoldBadge" type="PanelContainer" parent="Root/Rows/Content/TopBar/TopRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"PanelInset"
+
+[node name="GoldRow" type="HBoxContainer" parent="Root/Rows/Content/TopBar/TopRow/GoldBadge"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="GoldIcon" type="Label" parent="Root/Rows/Content/TopBar/TopRow/GoldBadge/GoldRow"]
+layout_mode = 2
+theme_type_variation = &"Gold"
+text = "◆"
+
+[node name="GoldLabel" type="Label" parent="Root/Rows/Content/TopBar/TopRow/GoldBadge/GoldRow"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Gold"
 text = "0 g"
 
-[node name="ActivityLabel" type="Label" parent="Rows/Content/TopBar/TopRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"Muted"
-text = "Idle"
-
-[node name="ScreenHost" type="MarginContainer" parent="Rows/Content"]
+[node name="ScreenHost" type="MarginContainer" parent="Root/Rows/Content"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
 
 [node name="NotificationArea" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -173,8 +241,8 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -460.0
-offset_top = -260.0
+offset_left = -480.0
+offset_top = -300.0
 offset_right = -20.0
 offset_bottom = -20.0
 grow_horizontal = 0
@@ -183,6 +251,5 @@ grow_vertical = 0
 [node name="ToastList" type="VBoxContainer" parent="NotificationArea"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 8
 alignment = 2
 theme_override_constants/separation = 6

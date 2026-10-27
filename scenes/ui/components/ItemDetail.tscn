@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/components/item_detail.gd" id="1_id"]
+
+[node name="ItemDetail" type="PanelContainer"]
+theme_type_variation = &"PanelInset"
+script = ExtResource("1_id")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = ""
+
+[node name="Meta" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"Small"
+text = ""
+
+[node name="Sep" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="Desc" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = ""
+autowrap_mode = 3
+
+[node name="Stats" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Empty" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Select an entry to see its details."
+autowrap_mode = 3

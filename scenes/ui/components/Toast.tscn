@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/components/toast.gd" id="1_t"]
+
+[node name="Toast" type="PanelContainer"]
+script = ExtResource("1_t")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Kind" type="Label" parent="Margin/Row"]
+layout_mode = 2
+text = "•"
+vertical_alignment = 0
+
+[node name="Message" type="Label" parent="Margin/Row"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+autowrap_mode = 3

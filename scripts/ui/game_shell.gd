@@ -4,6 +4,8 @@ extends Control
 ## swaps between editable screen scenes. Screens own their own layout; the shell
 ## owns navigation and the shared status line.
 
+const TOAST_SCENE := preload("res://scenes/ui/components/Toast.tscn")
+
 const SCREEN_SCENES := {
 	"home": "res://scenes/screens/home/home_screen.tscn",
 	"mining": "res://scenes/screens/mining/mining_screen.tscn",
@@ -28,14 +30,28 @@ const SCREEN_TITLES := {
 	"settings": "Settings",
 }
 
+const SCREEN_SUBTITLES := {
+	"home": "Every skill at a glance, and what you are doing right now",
+	"mining": "Work the deposits for ore and Mining levels",
+	"smithing": "Smelt ore into bars and forge tools, arms and armour",
+	"fishing": "Cast for raw catches and the occasional rare find",
+	"cooking": "Cook raw catches into food that sustains you in combat",
+	"combat": "Fight enemies for loot, gold and combat levels",
+	"bank": "Everything you have gathered and stored",
+	"equipment": "Your loadout, and everything you own that can be equipped",
+	"settings": "Display, audio and feedback preferences",
+}
+
 @onready var _host: MarginContainer = %ScreenHost
 @onready var _title: Label = %ScreenTitle
-@onready var _activity: Label = %ActivityLabel
+@onready var _subtitle: Label = %ScreenSubtitle
+@onready var _activity: StatusBadge = %ActivityBadge
 @onready var _profile_label: Label = %ProfileLabel
 @onready var _gold_label: Label = %GoldLabel
 @onready var _toast_list: VBoxContainer = %ToastList
 
 var _screens: Dictionary = {}
+var _nav_buttons: Dictionary = {}
 var _current: String = ""
 
 
@@ -69,6 +85,13 @@ func _wire_nav() -> void:
 	%NavEquipment.pressed.connect(func(): show_screen("equipment"))
 	%NavSettings.pressed.connect(func(): show_screen("settings"))
 	%NavCharacters.pressed.connect(_back_to_profiles)
+	_nav_buttons = {
+		"home": %NavHome, "mining": %NavMining, "smithing": %NavSmithing,
+		"fishing": %NavFishing, "cooking": %NavCooking, "combat": %NavCombat,
+		"bank": %NavBank, "equipment": %NavEquipment, "settings": %NavSettings,
+	}
+	for id in _nav_buttons:
+		_nav_buttons[id].toggle_mode = true
 
 
 func show_screen(id: String) -> void:
@@ -78,6 +101,9 @@ func show_screen(id: String) -> void:
 	for key in _screens.keys():
 		_screens[key].visible = (key == id)
 	_title.text = str(SCREEN_TITLES.get(id, id))
+	_subtitle.text = str(SCREEN_SUBTITLES.get(id, ""))
+	for key in _nav_buttons.keys():
+		_nav_buttons[key].button_pressed = (key == id)
 	if _screens[id].has_method("refresh"):
 		_screens[id].call("refresh")
 	_refresh_status()
@@ -98,7 +124,8 @@ func _refresh_status() -> void:
 
 
 func _refresh_activity() -> void:
-	_activity.text = _activity_text()
+	var active := GameSession.state != null and not GameSession.state.activity.is_empty()
+	_activity.configure(_activity_text(), Color("d18a55") if active else Color("777c7e"))
 
 
 func _activity_text() -> String:
@@ -124,26 +151,16 @@ func _activity_text() -> String:
 func _toast(text: String, kind: String = "info") -> void:
 	if not SettingsService.notifications_enabled:
 		return
-	var panel := PanelContainer.new()
-	var label := Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(360, 0)
-	match kind:
-		"warning":
-			label.add_theme_color_override("font_color", Color("e0b15b"))
-		"error":
-			label.add_theme_color_override("font_color", Color("e06c6c"))
-		"success":
-			label.add_theme_color_override("font_color", Color("5bd98a"))
-	panel.add_child(label)
-	_toast_list.add_child(panel)
+	var toast: Control = TOAST_SCENE.instantiate()
+	_toast_list.add_child(toast)
+	toast.configure(text, kind)
 	# Keep a short queue and fade out automatically.
 	while _toast_list.get_child_count() > 5:
 		_toast_list.get_child(0).free()
-	get_tree().create_timer(5.0).timeout.connect(func():
-		if is_instance_valid(panel):
-			panel.queue_free())
+	var hold := 8.0 if text.length() > 120 else 5.0
+	get_tree().create_timer(hold).timeout.connect(func():
+		if is_instance_valid(toast):
+			toast.queue_free())
 
 
 func _on_offline_summary(summary: Dictionary) -> void:

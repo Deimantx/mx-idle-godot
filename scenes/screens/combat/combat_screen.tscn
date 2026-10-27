@@ -1,10 +1,13 @@
-[gd_scene format=3 uid="uid://buirddlmp3ya4"]
+[gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" uid="uid://b262abgt8mmxx" path="res://scripts/ui/screens/combat_screen.gd" id="1_combat"]
-[ext_resource type="Texture2D" uid="uid://bxefksv64tgbw" path="res://assets/generated/mx_hero.png" id="2_76cpl"]
-[ext_resource type="Texture2D" uid="uid://b1bva4ocx555n" path="res://assets/generated/mx_enemy.png" id="3_x7cr5"]
+[ext_resource type="Script" path="res://scripts/ui/screens/combat_screen.gd" id="1_combat"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/SectionHeader.tscn" id="2_sh"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/ItemDetail.tscn" id="3_detail"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/EmptyState.tscn" id="4_empty"]
+[ext_resource type="Texture2D" path="res://assets/generated/mx_hero.png" id="5_hero"]
+[ext_resource type="Texture2D" path="res://assets/generated/mx_enemy.png" id="6_enemy"]
 
-[node name="CombatScreen" type="Control" unique_id=770358013]
+[node name="CombatScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +16,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_combat")
 
-[node name="HBox" type="HBoxContainer" parent="." unique_id=435503515]
+[node name="HBox" type="HBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,180 +25,254 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 14
 
-[node name="Left" type="PanelContainer" parent="HBox" unique_id=596050590]
+[node name="Left" type="PanelContainer" parent="HBox"]
 custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 
-[node name="LeftVBox" type="VBoxContainer" parent="HBox/Left" unique_id=1877581315]
+[node name="LeftVBox" type="VBoxContainer" parent="HBox/Left"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="AreaLabel" type="Label" parent="HBox/Left/LeftVBox" unique_id=2012775239]
+[node name="AreaHeader" parent="HBox/Left/LeftVBox" instance=ExtResource("2_sh")]
 layout_mode = 2
-theme_type_variation = &"Subtitle"
-text = "Area"
+title_text = "Encounter Area"
 
-[node name="AreaSelect" type="OptionButton" parent="HBox/Left/LeftVBox" unique_id=797857336]
+[node name="AreaSelect" type="OptionButton" parent="HBox/Left/LeftVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="TargetsLabel" type="Label" parent="HBox/Left/LeftVBox" unique_id=1295920027]
+[node name="TargetsHeader" parent="HBox/Left/LeftVBox" instance=ExtResource("2_sh")]
 layout_mode = 2
-theme_type_variation = &"Subtitle"
-text = "Targets"
+title_text = "Targets"
+hint_text = "Click to fight"
 
-[node name="Scroll" type="ScrollContainer" parent="HBox/Left/LeftVBox" unique_id=596606743]
+[node name="Scroll" type="ScrollContainer" parent="HBox/Left/LeftVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="EnemyList" type="VBoxContainer" parent="HBox/Left/LeftVBox/Scroll" unique_id=795518301]
+[node name="EnemyList" type="VBoxContainer" parent="HBox/Left/LeftVBox/Scroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="Right" type="PanelContainer" parent="HBox" unique_id=603033228]
+[node name="DetailPanel" type="PanelContainer" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+
+[node name="DVBox" type="VBoxContainer" parent="HBox/Left/LeftVBox/DetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DetailHeader" parent="HBox/Left/LeftVBox/DetailPanel/DVBox" instance=ExtResource("2_sh")]
+layout_mode = 2
+title_text = "Target Details"
+
+[node name="Stack" type="Control" parent="HBox/Left/LeftVBox/DetailPanel/DVBox"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+
+[node name="EnemyDetail" parent="HBox/Left/LeftVBox/DetailPanel/DVBox/Stack" instance=ExtResource("3_detail")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DetailEmpty" parent="HBox/Left/LeftVBox/DetailPanel/DVBox/Stack" instance=ExtResource("4_empty")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+message = "Select a target to see its stats."
+
+[node name="Right" type="VBoxContainer" parent="HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 12
 
-[node name="RightVBox" type="VBoxContainer" parent="HBox/Right" unique_id=539927961]
+[node name="EncounterPanel" type="PanelContainer" parent="HBox/Right"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EVBox" type="VBoxContainer" parent="HBox/Right/EncounterPanel"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Encounter" type="HBoxContainer" parent="HBox/Right/RightVBox" unique_id=495906190]
+[node name="EncounterHeader" parent="HBox/Right/EncounterPanel/EVBox" instance=ExtResource("2_sh")]
+layout_mode = 2
+title_text = "Encounter"
+
+[node name="Encounter" type="HBoxContainer" parent="HBox/Right/EncounterPanel/EVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 20
+theme_override_constants/separation = 18
 
-[node name="PlayerCol" type="VBoxContainer" parent="HBox/Right/RightVBox/Encounter" unique_id=1164876943]
+[node name="PlayerCol" type="VBoxContainer" parent="HBox/Right/EncounterPanel/EVBox/Encounter"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="PlayerSprite" type="TextureRect" parent="HBox/Right/RightVBox/Encounter/PlayerCol" unique_id=1417377453]
+[node name="PlayerSprite" type="TextureRect" parent="HBox/Right/EncounterPanel/EVBox/Encounter/PlayerCol"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 160)
+custom_minimum_size = Vector2(120, 110)
 layout_mode = 2
 size_flags_vertical = 3
-texture = ExtResource("2_76cpl")
+texture = ExtResource("5_hero")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="PlayerName" type="Label" parent="HBox/Right/RightVBox/Encounter/PlayerCol" unique_id=1793017534]
+[node name="PlayerName" type="Label" parent="HBox/Right/EncounterPanel/EVBox/Encounter/PlayerCol"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Adventurer"
 horizontal_alignment = 1
 
-[node name="PlayerHpBar" type="ProgressBar" parent="HBox/Right/RightVBox/Encounter/PlayerCol" unique_id=1048525468]
+[node name="PlayerHpBar" type="ProgressBar" parent="HBox/Right/EncounterPanel/EVBox/Encounter/PlayerCol"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+theme_type_variation = &"PlayerBar"
 show_percentage = false
 
-[node name="PlayerHpLabel" type="Label" parent="HBox/Right/RightVBox/Encounter/PlayerCol" unique_id=338035863]
+[node name="PlayerHpLabel" type="Label" parent="HBox/Right/EncounterPanel/EVBox/Encounter/PlayerCol"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Muted"
 text = "100 / 100 HP"
 horizontal_alignment = 1
 
-[node name="EnemyCol" type="VBoxContainer" parent="HBox/Right/RightVBox/Encounter" unique_id=1019733810]
+[node name="VsCol" type="VBoxContainer" parent="HBox/Right/EncounterPanel/EVBox/Encounter"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="VsLabel" type="Label" parent="HBox/Right/EncounterPanel/EVBox/Encounter/VsCol"]
+layout_mode = 2
+theme_type_variation = &"Title"
+theme_override_colors/font_color = Color(0.5019608, 0.3254902, 0.21568628, 1)
+text = "VS"
+
+[node name="EnemyCol" type="VBoxContainer" parent="HBox/Right/EncounterPanel/EVBox/Encounter"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="EnemySprite" type="TextureRect" parent="HBox/Right/RightVBox/Encounter/EnemyCol" unique_id=1601474611]
+[node name="EnemySprite" type="TextureRect" parent="HBox/Right/EncounterPanel/EVBox/Encounter/EnemyCol"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 160)
+custom_minimum_size = Vector2(120, 110)
 layout_mode = 2
 size_flags_vertical = 3
-texture = ExtResource("3_x7cr5")
+texture = ExtResource("6_enemy")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="EnemyName" type="Label" parent="HBox/Right/RightVBox/Encounter/EnemyCol" unique_id=1525756967]
+[node name="EnemyName" type="Label" parent="HBox/Right/EncounterPanel/EVBox/Encounter/EnemyCol"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "No target"
 horizontal_alignment = 1
 
-[node name="EnemyHpBar" type="ProgressBar" parent="HBox/Right/RightVBox/Encounter/EnemyCol" unique_id=2133061757]
+[node name="EnemyHpBar" type="ProgressBar" parent="HBox/Right/EncounterPanel/EVBox/Encounter/EnemyCol"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+theme_type_variation = &"EnemyBar"
 show_percentage = false
 
-[node name="EnemyHpLabel" type="Label" parent="HBox/Right/RightVBox/Encounter/EnemyCol" unique_id=1606889063]
+[node name="EnemyHpLabel" type="Label" parent="HBox/Right/EncounterPanel/EVBox/Encounter/EnemyCol"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Muted"
 horizontal_alignment = 1
 
-[node name="SatietyRow" type="HBoxContainer" parent="HBox/Right/RightVBox" unique_id=1684339318]
+[node name="SatietyRow" type="HBoxContainer" parent="HBox/Right/EncounterPanel/EVBox"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="SatietyCaption" type="Label" parent="HBox/Right/RightVBox/SatietyRow" unique_id=2106158147]
+[node name="SatietyCaption" type="Label" parent="HBox/Right/EncounterPanel/EVBox/SatietyRow"]
 layout_mode = 2
+theme_type_variation = &"Muted"
 text = "Satiety"
 
-[node name="SatietyBar" type="ProgressBar" parent="HBox/Right/RightVBox/SatietyRow" unique_id=248379428]
+[node name="SatietyBar" type="ProgressBar" parent="HBox/Right/EncounterPanel/EVBox/SatietyRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"SatietyBar"
 value = 100.0
 show_percentage = false
 
-[node name="SequenceLabel" type="RichTextLabel" parent="HBox/Right/RightVBox" unique_id=836086326]
+[node name="StatusPanel" type="PanelContainer" parent="HBox/Right"]
+layout_mode = 2
+
+[node name="SVBox" type="VBoxContainer" parent="HBox/Right/StatusPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SeqHeader" parent="HBox/Right/StatusPanel/SVBox" instance=ExtResource("2_sh")]
+layout_mode = 2
+title_text = "Enemy Sequence"
+
+[node name="SequenceLabel" type="RichTextLabel" parent="HBox/Right/StatusPanel/SVBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 46)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 bbcode_enabled = true
 text = "Select a target to begin."
 fit_content = true
 
-[node name="CombatLog" type="HBoxContainer" parent="HBox/Right/RightVBox" unique_id=1297561064]
+[node name="CombatLog" type="HBoxContainer" parent="HBox/Right/StatusPanel/SVBox"]
 layout_mode = 2
 
-[node name="LoadoutLabel" type="Label" parent="HBox/Right/RightVBox/CombatLog" unique_id=2097532054]
+[node name="LoadoutLabel" type="Label" parent="HBox/Right/StatusPanel/SVBox/CombatLog"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"Muted"
 
-[node name="LastHitLabel" type="Label" parent="HBox/Right/RightVBox/CombatLog" unique_id=1938701184]
+[node name="LastHitLabel" type="Label" parent="HBox/Right/StatusPanel/SVBox/CombatLog"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Accent"
 
-[node name="PrefsPanel" type="PanelContainer" parent="HBox/Right/RightVBox" unique_id=1914632169]
+[node name="PrefsPanel" type="PanelContainer" parent="HBox/Right"]
 layout_mode = 2
 
-[node name="PrefsBox" type="VBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel" unique_id=1916449641]
+[node name="PrefsBox" type="VBoxContainer" parent="HBox/Right/PrefsPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
-[node name="Toggles" type="HBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox" unique_id=261997254]
+[node name="PrefsHeader" parent="HBox/Right/PrefsPanel/PrefsBox" instance=ExtResource("2_sh")]
 layout_mode = 2
+title_text = "Automation & Food"
 
-[node name="AutoCombatCheck" type="CheckButton" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles" unique_id=1285985777]
+[node name="Toggles" type="HBoxContainer" parent="HBox/Right/PrefsPanel/PrefsBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="AutoCombatCheck" type="CheckButton" parent="HBox/Right/PrefsPanel/PrefsBox/Toggles"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Auto Combat"
 
-[node name="AutoEatCheck" type="CheckButton" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles" unique_id=1903813672]
+[node name="AutoEatCheck" type="CheckButton" parent="HBox/Right/PrefsPanel/PrefsBox/Toggles"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Auto Eat"
 
-[node name="EatLabel" type="Label" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles" unique_id=93418938]
+[node name="EatLabel" type="Label" parent="HBox/Right/PrefsPanel/PrefsBox/Toggles"]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_type_variation = &"Muted"
 text = "Eat below"
 
-[node name="EatThreshold" type="HSlider" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles" unique_id=1526578407]
+[node name="EatThreshold" type="HSlider" parent="HBox/Right/PrefsPanel/PrefsBox/Toggles"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
@@ -204,35 +281,40 @@ max_value = 0.9
 step = 0.05
 value = 0.5
 
-[node name="ThresholdLabel" type="Label" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles" unique_id=381529213]
+[node name="ThresholdLabel" type="Label" parent="HBox/Right/PrefsPanel/PrefsBox/Toggles"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"Muted"
 text = "50%"
 
-[node name="FoodRow" type="HBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox" unique_id=1064526391]
+[node name="FoodRow" type="HBoxContainer" parent="HBox/Right/PrefsPanel/PrefsBox"]
 layout_mode = 2
+theme_override_constants/separation = 12
 
-[node name="FoodCaption" type="Label" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/FoodRow" unique_id=1526633249]
+[node name="FoodCaption" type="Label" parent="HBox/Right/PrefsPanel/PrefsBox/FoodRow"]
 layout_mode = 2
+theme_type_variation = &"Muted"
 text = "Food"
+vertical_alignment = 1
 
-[node name="FoodSlots" type="HBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/FoodRow" unique_id=1792537524]
+[node name="FoodSlots" type="HBoxContainer" parent="HBox/Right/PrefsPanel/PrefsBox/FoodRow"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
-[node name="StockFoodButton" type="Button" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/FoodRow" unique_id=1770876796]
+[node name="StockFoodButton" type="Button" parent="HBox/Right/PrefsPanel/PrefsBox/FoodRow"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Stock Food"
+size_flags_vertical = 4
+text = "Auto-Stock Food"
 
-[node name="ActionRow" type="HBoxContainer" parent="HBox/Right/RightVBox" unique_id=4349923]
+[node name="ActionRow" type="HBoxContainer" parent="HBox/Right"]
 layout_mode = 2
 
-[node name="StartButton" type="Button" parent="HBox/Right/RightVBox/ActionRow" unique_id=440871279]
+[node name="StartButton" type="Button" parent="HBox/Right/ActionRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(220, 44)
+custom_minimum_size = Vector2(220, 48)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"PrimaryButton"

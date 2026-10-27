@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/screens/equipment_screen.gd" id="1_equip"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/SectionHeader.tscn" id="2_sh"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/ItemDetail.tscn" id="3_detail"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/EmptyState.tscn" id="4_empty"]
 
 [node name="EquipmentScreen" type="Control"]
 layout_mode = 3
@@ -28,10 +31,10 @@ layout_mode = 2
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Hdr" type="Label" parent="HBox/Left/LeftVBox"]
+[node name="Header" parent="HBox/Left/LeftVBox" instance=ExtResource("2_sh")]
 layout_mode = 2
-theme_type_variation = &"Subtitle"
-text = "Equipped"
+title_text = "Equipped"
+hint_text = "Click a slot to unequip"
 
 [node name="Scroll" type="ScrollContainer" parent="HBox/Left/LeftVBox"]
 layout_mode = 2
@@ -43,25 +46,64 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="Right" type="PanelContainer" parent="HBox"]
+[node name="Right" type="VBoxContainer" parent="HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 12
 
-[node name="RightVBox" type="VBoxContainer" parent="HBox/Right"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Hdr" type="Label" parent="HBox/Right/RightVBox"]
-layout_mode = 2
-theme_type_variation = &"Subtitle"
-text = "Equippable (from Bank)"
-
-[node name="Scroll" type="ScrollContainer" parent="HBox/Right/RightVBox"]
+[node name="BankPanel" type="PanelContainer" parent="HBox/Right"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="EquipList" type="VBoxContainer" parent="HBox/Right/RightVBox/Scroll"]
+[node name="BVBox" type="VBoxContainer" parent="HBox/Right/BankPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" parent="HBox/Right/BankPanel/BVBox" instance=ExtResource("2_sh")]
+layout_mode = 2
+title_text = "Equippable (from Bank)"
+hint_text = "Click to equip"
+
+[node name="Scroll" type="ScrollContainer" parent="HBox/Right/BankPanel/BVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EquipList" type="VBoxContainer" parent="HBox/Right/BankPanel/BVBox/Scroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
+
+[node name="DetailPanel" type="PanelContainer" parent="HBox/Right"]
+layout_mode = 2
+
+[node name="DVBox" type="VBoxContainer" parent="HBox/Right/DetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" parent="HBox/Right/DetailPanel/DVBox" instance=ExtResource("2_sh")]
+layout_mode = 2
+title_text = "Item Details"
+
+[node name="Stack" type="Control" parent="HBox/Right/DetailPanel/DVBox"]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+
+[node name="ItemDetailView" parent="HBox/Right/DetailPanel/DVBox/Stack" instance=ExtResource("3_detail")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DetailEmpty" parent="HBox/Right/DetailPanel/DVBox/Stack" instance=ExtResource("4_empty")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+message = "Select an item to compare its stats."

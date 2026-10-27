@@ -27,6 +27,7 @@ GameSession="*res://scripts/app/game_session.gd"
 
 window/size/viewport_width=1920.0
 window/size/viewport_height=1080.0
+window/size/no_focus=true
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

@@ -1,15 +1,27 @@
 extends Control
 
-## Bank: searchable item list with compact rows, rarity colouring and inline
-## equip for equippable items.
+## Bank: a searchable, category-filtered grid of everything the character has
+## stored. Selecting a slot previews the item and offers its real action
+## (equip / add to a food slot) where one exists.
 
-@onready var _item_list: VBoxContainer = %ItemList
+const InventorySlotScene := preload("res://scenes/ui/components/InventorySlot.tscn")
+
+@onready var _grid: GridContainer = %ItemGrid
 @onready var _search: LineEdit = %SearchField
 @onready var _count_label: Label = %CountLabel
+@onready var _category: OptionButton = %CategoryFilter
+@onready var _detail: ItemDetail = %ItemDetailView
+@onready var _empty: EmptyState = %DetailEmpty
+@onready var _action: Button = %ActionButton
+
+var _selected: String = ""
+var _category_filter: String = "all"
 
 
 func _ready() -> void:
 	_search.text_changed.connect(func(_t): _rebuild())
+	_category.item_selected.connect(_on_category_selected)
+	_action.pressed.connect(_on_action)
 	EventBus.bank_changed.connect(_on_bank_changed)
 	EventBus.equipment_changed.connect(_rebuild)
 	EventBus.profile_loaded.connect(_rebuild)
@@ -25,8 +37,33 @@ func _on_bank_changed() -> void:
 		_rebuild()
 
 
+func _rebuild_categories() -> void:
+	var state := GameSession.state
+	_category.clear()
+	_category.add_item("All categories")
+	_category.set_item_metadata(0, "all")
+	var cats := {}
+	if state != null:
+		for item_id in state.bank.keys():
+			var item := ContentRegistry.get_item(str(item_id))
+			if not item.is_empty():
+				cats[str(item.get("category", "misc"))] = true
+	var keys: Array = cats.keys()
+	keys.sort()
+	for c in keys:
+		var i := _category.item_count
+		_category.add_item(str(c).capitalize())
+		_category.set_item_metadata(i, str(c))
+	var found := 0
+	for i in range(_category.item_count):
+		if str(_category.get_item_metadata(i)) == _category_filter:
+			found = i
+	_category.select(found)
+
+
 func _rebuild() -> void:
-	for child in _item_list.get_children():
+	_rebuild_categories()
+	for child in _grid.get_children():
 		child.queue_free()
 	var state := GameSession.state
 	if state == null:
@@ -41,39 +78,54 @@ func _rebuild() -> void:
 			continue
 		if query != "" and not str(item["name"]).to_lower().contains(query):
 			continue
+		if _category_filter != "all" and str(item.get("category", "")) != _category_filter:
+			continue
 		shown += 1
-		_item_list.add_child(_row(str(item_id), item, int(state.bank[item_id])))
+		var id := str(item_id)
+		var slot := InventorySlotScene.instantiate()
+		slot.name = "Slot_" + id.replace(".", "_")
+		_grid.add_child(slot)
+		slot.set_item(id, int(state.bank[id]))
+		slot.pressed.connect(func(): _select(id))
 	_count_label.text = "%d stacks · %d shown" % [ids.size(), shown]
+	_show_detail(_selected)
 
 
-func _row(item_id: String, item: Dictionary, qty: int) -> Control:
-	var row := HBoxContainer.new()
-	row.add_child(UiUtil.make_icon(item_id, 30))
+func _select(item_id: String) -> void:
+	_selected = item_id
+	_show_detail(item_id)
 
-	var name_label := Label.new()
-	name_label.text = str(item["name"])
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_label.add_theme_color_override("font_color", UiUtil.rarity_color(str(item.get("rarity", "common"))))
-	row.add_child(name_label)
 
-	var tier_label := Label.new()
-	tier_label.text = "T%d" % int(item.get("tier", 0))
-	tier_label.theme_type_variation = &"Muted"
-	tier_label.custom_minimum_size = Vector2(42, 0)
-	row.add_child(tier_label)
+func _show_detail(item_id: String) -> void:
+	var state := GameSession.state
+	if item_id == "" or state == null or not state.bank.has(item_id):
+		_detail.visible = false
+		_empty.visible = true
+		_action.visible = false
+		return
+	_detail.visible = true
+	_empty.visible = false
+	_detail.show_item(item_id)
+	_detail.add_stat("In bank", UiUtil.format_number(int(state.bank[item_id])))
+	var item := ContentRegistry.get_item(item_id)
+	var slot := str(item.get("equip_slot", ""))
+	if slot == "":
+		_action.visible = false
+	else:
+		_action.visible = true
+		_action.text = "Add to food slot" if slot == "food" else "Equip"
 
-	var qty_label := Label.new()
-	qty_label.text = UiUtil.format_number(qty)
-	qty_label.custom_minimum_size = Vector2(100, 0)
-	qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	row.add_child(qty_label)
 
-	if str(item.get("equip_slot", "")) != "":
-		var equip := Button.new()
-		equip.text = "Equip"
-		equip.pressed.connect(func(): _equip(item_id))
-		row.add_child(equip)
-	return row
+func _on_category_selected(index: int) -> void:
+	_category_filter = str(_category.get_item_metadata(index))
+	_rebuild()
+
+
+func _on_action() -> void:
+	if _selected == "":
+		return
+	_equip(_selected)
+	_show_detail(_selected)
 
 
 func _equip(item_id: String) -> void:

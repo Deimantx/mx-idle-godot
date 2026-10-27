@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/components/section_header.gd" id="1_sh"]
+
+[node name="SectionHeader" type="HBoxContainer"]
+theme_override_constants/separation = 10
+script = ExtResource("1_sh")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"Heading"
+text = "Section"
+
+[node name="Spacer" type="Control" parent="."]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+
+[node name="Hint" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = ""
+vertical_alignment = 1

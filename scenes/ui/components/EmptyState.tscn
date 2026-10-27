@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/components/empty_state.gd" id="1_es"]
+
+[node name="EmptyState" type="VBoxContainer"]
+alignment = 1
+theme_override_constants/separation = 6
+script = ExtResource("1_es")
+
+[node name="Glyph" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"Title"
+text = "—"
+horizontal_alignment = 1
+
+[node name="Message" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3

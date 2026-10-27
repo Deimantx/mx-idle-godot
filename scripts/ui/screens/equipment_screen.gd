@@ -2,9 +2,14 @@ extends Control
 
 ## Equipment: current slots (left) and equippable bank items (right). Every
 ## equip/unequip goes through EquipmentSystem, which owns ownership rules.
+## Selecting a row previews the item in the detail panel.
+
+const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 
 @onready var _slot_list: VBoxContainer = %SlotList
 @onready var _equip_list: VBoxContainer = %EquipList
+@onready var _detail: ItemDetail = %ItemDetailView
+@onready var _empty: EmptyState = %DetailEmpty
 
 
 func _ready() -> void:
@@ -12,6 +17,7 @@ func _ready() -> void:
 	EventBus.bank_changed.connect(_on_bank_changed)
 	EventBus.profile_loaded.connect(_rebuild)
 	_rebuild()
+	_show_detail("")
 
 
 func refresh() -> void:
@@ -39,59 +45,33 @@ func _rebuild() -> void:
 
 func _slot_row(state: CharacterState, slot: String) -> Control:
 	var item_id := str(state.equipment.get(slot, ""))
-	var row := HBoxContainer.new()
-
-	var slot_label := Label.new()
-	slot_label.text = slot.capitalize()
-	slot_label.custom_minimum_size = Vector2(96, 0)
-	row.add_child(slot_label)
-
+	var entry := ListEntryScene.instantiate()
 	if item_id == "":
-		var empty := Label.new()
-		empty.text = "-"
-		empty.theme_type_variation = &"Muted"
-		empty.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(empty)
-		return row
-
-	row.add_child(UiUtil.make_icon(item_id, 30))
-	var name_label := Label.new()
-	name_label.text = ContentRegistry.item_name(item_id)
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_label.add_theme_color_override("font_color", UiUtil.rarity_color(str(ContentRegistry.get_item(item_id).get("rarity", "common"))))
-	row.add_child(name_label)
-
-	var stat_label := Label.new()
-	stat_label.text = _stats_text(item_id)
-	stat_label.theme_type_variation = &"Muted"
-	row.add_child(stat_label)
-
-	var unequip := Button.new()
-	unequip.text = "Unequip"
-	unequip.pressed.connect(func(): _unequip(slot))
-	row.add_child(unequip)
-	return row
+		entry.hide_icon()
+		entry.configure(slot.capitalize(), "Empty", "", "")
+		entry.set_sub_color(Color("777c7e"))
+		return entry
+	entry.set_icon_item(item_id)
+	entry.configure(slot.capitalize(), ContentRegistry.item_name(item_id), "T%d" % int(ContentRegistry.get_item(item_id).get("tier", 0)), "Unequip")
+	entry.set_title_color(UiUtil.rarity_color(str(ContentRegistry.get_item(item_id).get("rarity", "common"))))
+	entry.tooltip_text = _stats_text(item_id)
+	entry.pressed.connect(func():
+		_unequip(slot)
+		_show_detail(item_id))
+	return entry
 
 
 func _equip_row(_state: CharacterState, item_id: String) -> Control:
-	var row := HBoxContainer.new()
-	row.add_child(UiUtil.make_icon(item_id, 28))
-
-	var name_label := Label.new()
-	name_label.text = ContentRegistry.item_name(item_id)
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(name_label)
-
-	var stats := Label.new()
-	stats.text = _stats_text(item_id)
-	stats.theme_type_variation = &"Muted"
-	row.add_child(stats)
-
-	var equip := Button.new()
-	equip.text = "Equip"
-	equip.pressed.connect(func(): _equip(item_id))
-	row.add_child(equip)
-	return row
+	var entry := ListEntryScene.instantiate()
+	entry.set_icon_item(item_id)
+	var item := ContentRegistry.get_item(item_id)
+	entry.configure(ContentRegistry.item_name(item_id), _stats_text(item_id), "T%d" % int(item.get("tier", 0)), "Equip")
+	entry.set_title_color(UiUtil.rarity_color(str(item.get("rarity", "common"))))
+	entry.tooltip_text = str(item.get("description", ""))
+	entry.pressed.connect(func():
+		_equip(item_id)
+		_show_detail(item_id))
+	return entry
 
 
 func _equippable_ids(state: CharacterState) -> Array:
@@ -109,8 +89,20 @@ func _stats_text(item_id: String) -> String:
 	var stats: Dictionary = item.get("stats", {})
 	var parts: Array = []
 	for key in stats.keys():
-		parts.append("%s %s" % [key, str(stats[key])])
-	return "  ".join(parts)
+		parts.append("%s %s" % [str(key).capitalize(), str(stats[key])])
+	if parts.is_empty():
+		return "No bonuses"
+	return " · ".join(parts)
+
+
+func _show_detail(item_id: String) -> void:
+	if item_id == "":
+		_detail.visible = false
+		_empty.visible = true
+		return
+	_detail.visible = true
+	_empty.visible = false
+	_detail.show_item(item_id)
 
 
 func _equip(item_id: String) -> void:

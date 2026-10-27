@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/screens/home_screen.gd" id="1_home"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/SectionHeader.tscn" id="2_sh"]
 
 [node name="HomeScreen" type="Control"]
 layout_mode = 3
@@ -20,37 +21,100 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 14
 
-[node name="SkillsPanel" type="PanelContainer" parent="VBox"]
+[node name="HeroCard" type="PanelContainer" parent="VBox"]
 layout_mode = 2
-size_flags_vertical = 3
+theme_type_variation = &"Card"
 
-[node name="SkillsVBox" type="VBoxContainer" parent="VBox/SkillsPanel"]
+[node name="HBox" type="HBoxContainer" parent="VBox/HeroCard"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 16
 
-[node name="Header" type="Label" parent="VBox/SkillsPanel/SkillsVBox"]
-layout_mode = 2
-theme_type_variation = &"Subtitle"
-text = "Skills"
-
-[node name="SkillList" type="VBoxContainer" parent="VBox/SkillsPanel/SkillsVBox"]
+[node name="HeroName" type="Label" parent="VBox/HeroCard/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_type_variation = &"Title"
+text = "Adventurer"
 
-[node name="ActivityPanel" type="PanelContainer" parent="VBox"]
+[node name="Spacer" type="Control" parent="VBox/HeroCard/HBox"]
 layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="ActivityVBox" type="VBoxContainer" parent="VBox/ActivityPanel"]
+[node name="HeroMeta" type="Label" parent="VBox/HeroCard/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = ""
+vertical_alignment = 1
+
+[node name="Columns" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="SkillsCard" type="PanelContainer" parent="VBox/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"Card"
+
+[node name="SVBox" type="VBoxContainer" parent="VBox/Columns/SkillsCard"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" parent="VBox/Columns/SkillsCard/SVBox" instance=ExtResource("2_sh")]
+layout_mode = 2
+title_text = "Skills"
+hint_text = "Progress to the next level"
+
+[node name="SkillList" type="VBoxContainer" parent="VBox/Columns/SkillsCard/SVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="SideCol" type="VBoxContainer" parent="VBox/Columns"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="ActivityCard" type="PanelContainer" parent="VBox/Columns/SideCol"]
+layout_mode = 2
+theme_type_variation = &"Card"
+
+[node name="AVBox" type="VBoxContainer" parent="VBox/Columns/SideCol/ActivityCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Header" type="Label" parent="VBox/ActivityPanel/ActivityVBox"]
+[node name="Header" parent="VBox/Columns/SideCol/ActivityCard/AVBox" instance=ExtResource("2_sh")]
 layout_mode = 2
-theme_type_variation = &"Subtitle"
-text = "Current activity"
+title_text = "Current Activity"
 
-[node name="ActivityInfo" type="Label" parent="VBox/ActivityPanel/ActivityVBox"]
+[node name="ActivityInfo" type="Label" parent="VBox/Columns/SideCol/ActivityCard/AVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Idle."
+autowrap_mode = 3
+
+[node name="ActivityBar" type="ProgressBar" parent="VBox/Columns/SideCol/ActivityCard/AVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+max_value = 1.0
+show_percentage = false
+
+[node name="SummaryCard" type="PanelContainer" parent="VBox/Columns/SideCol"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"Card"
+
+[node name="SumVBox" type="VBoxContainer" parent="VBox/Columns/SideCol/SummaryCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" parent="VBox/Columns/SideCol/SummaryCard/SumVBox" instance=ExtResource("2_sh")]
+layout_mode = 2
+title_text = "Lifetime"
+
+[node name="SummaryRows" type="VBoxContainer" parent="VBox/Columns/SideCol/SummaryCard/SumVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
