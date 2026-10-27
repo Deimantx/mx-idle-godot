@@ -1,0 +1,82 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/profile_select.gd" id="1_ps"]
+
+[node name="ProfileSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ps")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.09, 0.129, 0.169, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(640, 540)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"Title"
+text = "MX-Idle"
+
+[node name="Subtitle" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Select or create a character. Each profile keeps its own progress."
+
+[node name="ProfileList" type="VBoxContainer" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="Sep" type="HSeparator" parent="Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="CreateLabel" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Create a character"
+
+[node name="CreateRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="NameInput" type="LineEdit" parent="Center/Panel/VBox/CreateRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Character name"
+
+[node name="CreateButton" type="Button" parent="Center/Panel/VBox/CreateRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Create"
+
+[node name="StatusLabel" type="Label" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Slots used: 0 / 3"

@@ -1,0 +1,67 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/screens/equipment_screen.gd" id="1_equip"]
+
+[node name="EquipmentScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_equip")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="Left" type="PanelContainer" parent="HBox"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+
+[node name="LeftVBox" type="VBoxContainer" parent="HBox/Left"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Hdr" type="Label" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Equipped"
+
+[node name="Scroll" type="ScrollContainer" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SlotList" type="VBoxContainer" parent="HBox/Left/LeftVBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Right" type="PanelContainer" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RightVBox" type="VBoxContainer" parent="HBox/Right"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Hdr" type="Label" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Equippable (from Bank)"
+
+[node name="Scroll" type="ScrollContainer" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EquipList" type="VBoxContainer" parent="HBox/Right/RightVBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

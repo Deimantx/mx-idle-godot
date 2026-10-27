@@ -1,0 +1,56 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/screens/home_screen.gd" id="1_home"]
+
+[node name="HomeScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_home")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="SkillsPanel" type="PanelContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SkillsVBox" type="VBoxContainer" parent="VBox/SkillsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="VBox/SkillsPanel/SkillsVBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Skills"
+
+[node name="SkillList" type="VBoxContainer" parent="VBox/SkillsPanel/SkillsVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ActivityPanel" type="PanelContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="ActivityVBox" type="VBoxContainer" parent="VBox/ActivityPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="VBox/ActivityPanel/ActivityVBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Current activity"
+
+[node name="ActivityInfo" type="Label" parent="VBox/ActivityPanel/ActivityVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Idle."

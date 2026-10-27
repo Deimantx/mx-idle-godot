@@ -1,0 +1,241 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/screens/combat_screen.gd" id="1_combat"]
+
+[node name="CombatScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_combat")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="Left" type="PanelContainer" parent="HBox"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+
+[node name="LeftVBox" type="VBoxContainer" parent="HBox/Left"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AreaLabel" type="Label" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Area"
+
+[node name="AreaSelect" type="OptionButton" parent="HBox/Left/LeftVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TargetsLabel" type="Label" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Targets"
+
+[node name="Scroll" type="ScrollContainer" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EnemyList" type="VBoxContainer" parent="HBox/Left/LeftVBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Right" type="PanelContainer" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RightVBox" type="VBoxContainer" parent="HBox/Right"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Encounter" type="HBoxContainer" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="PlayerCol" type="VBoxContainer" parent="HBox/Right/RightVBox/Encounter"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="PlayerSprite" type="TextureRect" parent="HBox/Right/RightVBox/Encounter/PlayerCol"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerName" type="Label" parent="HBox/Right/RightVBox/Encounter/PlayerCol"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "Adventurer"
+
+[node name="PlayerHpBar" type="ProgressBar" parent="HBox/Right/RightVBox/Encounter/PlayerCol"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+max_value = 100.0
+show_percentage = false
+
+[node name="PlayerHpLabel" type="Label" parent="HBox/Right/RightVBox/Encounter/PlayerCol"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Muted"
+horizontal_alignment = 1
+text = "100 / 100 HP"
+
+[node name="EnemyCol" type="VBoxContainer" parent="HBox/Right/RightVBox/Encounter"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="EnemySprite" type="TextureRect" parent="HBox/Right/RightVBox/Encounter/EnemyCol"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="EnemyName" type="Label" parent="HBox/Right/RightVBox/Encounter/EnemyCol"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "No target"
+
+[node name="EnemyHpBar" type="ProgressBar" parent="HBox/Right/RightVBox/Encounter/EnemyCol"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+max_value = 100.0
+show_percentage = false
+
+[node name="EnemyHpLabel" type="Label" parent="HBox/Right/RightVBox/Encounter/EnemyCol"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Muted"
+horizontal_alignment = 1
+text = ""
+
+[node name="SatietyRow" type="HBoxContainer" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+
+[node name="SatietyCaption" type="Label" parent="HBox/Right/RightVBox/SatietyRow"]
+layout_mode = 2
+text = "Satiety"
+
+[node name="SatietyBar" type="ProgressBar" parent="HBox/Right/RightVBox/SatietyRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="SequenceLabel" type="RichTextLabel" parent="HBox/Right/RightVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+text = "Select a target to begin."
+
+[node name="CombatLog" type="HBoxContainer" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+
+[node name="LoadoutLabel" type="Label" parent="HBox/Right/RightVBox/CombatLog"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"Muted"
+text = ""
+
+[node name="LastHitLabel" type="Label" parent="HBox/Right/RightVBox/CombatLog"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Accent"
+text = ""
+
+[node name="PrefsPanel" type="PanelContainer" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+
+[node name="PrefsBox" type="VBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Toggles" type="HBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox"]
+layout_mode = 2
+
+[node name="AutoCombatCheck" type="CheckButton" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Auto Combat"
+
+[node name="AutoEatCheck" type="CheckButton" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Auto Eat"
+
+[node name="EatLabel" type="Label" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Eat below"
+
+[node name="EatThreshold" type="HSlider" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+min_value = 0.1
+max_value = 0.9
+step = 0.05
+value = 0.5
+
+[node name="ThresholdLabel" type="Label" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/Toggles"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "50%"
+
+[node name="FoodRow" type="HBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox"]
+layout_mode = 2
+
+[node name="FoodCaption" type="Label" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/FoodRow"]
+layout_mode = 2
+text = "Food"
+
+[node name="FoodSlots" type="HBoxContainer" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/FoodRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="StockFoodButton" type="Button" parent="HBox/Right/RightVBox/PrefsPanel/PrefsBox/FoodRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Stock Food"
+
+[node name="ActionRow" type="HBoxContainer" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="HBox/Right/RightVBox/ActionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PrimaryButton"
+text = "Select a target"

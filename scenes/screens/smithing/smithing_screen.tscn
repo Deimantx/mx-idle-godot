@@ -1,0 +1,106 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/screens/smithing_screen.gd" id="1_smithing"]
+
+[node name="SmithingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_smithing")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="Left" type="PanelContainer" parent="HBox"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+
+[node name="LeftVBox" type="VBoxContainer" parent="HBox/Left"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Hdr" type="Label" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "Recipes"
+
+[node name="Tabs" type="TabContainer" parent="HBox/Left/LeftVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+tab_alignment = 1
+
+[node name="Smelt" type="MarginContainer" parent="HBox/Left/LeftVBox/Tabs"]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="HBox/Left/LeftVBox/Tabs/Smelt"]
+layout_mode = 2
+
+[node name="SmeltList" type="VBoxContainer" parent="HBox/Left/LeftVBox/Tabs/Smelt/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Forge" type="MarginContainer" parent="HBox/Left/LeftVBox/Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="HBox/Left/LeftVBox/Tabs/Forge"]
+layout_mode = 2
+
+[node name="ForgeList" type="VBoxContainer" parent="HBox/Left/LeftVBox/Tabs/Forge/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Right" type="PanelContainer" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RightVBox" type="VBoxContainer" parent="HBox/Right"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ActiveName" type="Label" parent="HBox/Right/RightVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "No active recipe"
+
+[node name="ActiveInfo" type="Label" parent="HBox/Right/RightVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Select a recipe to begin."
+
+[node name="ActiveBar" type="ProgressBar" parent="HBox/Right/RightVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+max_value = 1.0
+show_percentage = false
+
+[node name="RateLabel" type="Label" parent="HBox/Right/RightVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Accent"
+
+[node name="Spacer" type="Control" parent="HBox/Right/RightVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StopButton" type="Button" parent="HBox/Right/RightVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DangerButton"
+text = "Stop"
