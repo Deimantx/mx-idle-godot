@@ -1,4 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
-/addons/ziva_agent/zivacode/windows_x86_64/zivacode.exe
+
+# Ziva AI agent addon: kept locally on this machine, never pushed to GitHub.
+/addons/
