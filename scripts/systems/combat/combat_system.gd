@@ -152,8 +152,10 @@ static func _player_attack(state: CharacterState, act: Dictionary, enemy: Dictio
 	var crit := randf() < CRIT_CHANCE
 	if crit:
 		dmg *= CRIT_MULT
-	var resist := float((enemy["resistances"] as Dictionary).get(damage_type, 0))
-	dmg *= (1.0 - clampf(resist, -0.9, 0.9))
+	# Resistances are authored in percentage points (20 == 20%); penetration is 0 for now.
+	var resist_points := float((enemy["resistances"] as Dictionary).get(damage_type, 0))
+	var effective := clampf(resist_points / 100.0, -0.9, 0.9)
+	dmg *= (1.0 - effective)
 	var final := int(round(maxf(1.0, dmg)))
 	act["enemy_hp"] = int(act["enemy_hp"]) - final
 	events["combat"]["player_attack"] = {"hit": true, "damage": final, "crit": crit, "damage_type": damage_type}

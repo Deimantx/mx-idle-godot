@@ -133,3 +133,71 @@ func test_equipment_ownership() -> void:
 	assert(state.equipment["tool"] == "item.tool.pickaxe.bronze", "slot filled")
 	assert(InventorySystem.count(state, "item.tool.pickaxe.bronze") == 0, "equipped item leaves the bank")
 	assert(not EquipmentSystem.equip(state, "item.ore.copper")["ok"], "non-equipment rejected")
+
+
+func test_fishing_system_loop() -> void:
+	var state := _make_state()
+	InventorySystem.add(state, "item.tool.rod.bronze", 1)
+	EquipmentSystem.equip(state, "item.tool.rod.bronze")
+	assert(not FishingSystem.can_start(state, "spot.fishing.trout")["ok"], "locked spot gated by level")
+	assert(FishingSystem.can_start(state, "spot.fishing.shrimp")["ok"], "tier 1 spot available with a rod")
+	var act := FishingSystem.make_activity(state, "spot.fishing.shrimp")
+	for _i in range(30):
+		FishingSystem.on_action(state, act)
+	var fish := 0
+	for item_id in state.bank.keys():
+		if str(ContentRegistry.get_item(str(item_id)).get("category", "")) == "fish":
+			fish += InventorySystem.count(state, str(item_id))
+	assert(fish >= 20, "fishing yields catches (ignoring rare non-fish finds)")
+	assert(state.get_level("fishing") > 1, "fishing grants levels")
+
+
+func test_cooking_system() -> void:
+	var state := _make_state()
+	InventorySystem.add(state, "item.fish.shrimp", 5)
+	assert(CraftingSystem.can_start(state, "recipe.cooking.shrimp")["ok"], "cook recipe available")
+	var act := CraftingSystem.make_activity(state, "recipe.cooking.shrimp")
+	assert(InventorySystem.count(state, "item.fish.shrimp") == 4, "input reserved on start")
+	CraftingSystem.on_action(state, act)
+	assert(InventorySystem.count(state, "item.food.shrimp") == 1, "cooking produces food")
+
+
+func test_food_sustain_and_overeat() -> void:
+	var state := _make_state()
+	InventorySystem.add(state, "item.food.shrimp", 3)
+	assert(FoodSystem.assign(state, "item.food.shrimp")["ok"], "food assigned to a slot")
+	state.hp = 10
+	state.satiety = 50.0
+	var eaten := FoodSystem.eat(state, "item.food.shrimp")
+	assert(eaten["ok"] and not eaten["overeat"], "eating is fine when not full")
+	assert(state.hp > 10, "eating heals")
+	assert(InventorySystem.count(state, "item.food.shrimp") == 2, "eating consumes one unit")
+	state.satiety = 100.0
+	var over := FoodSystem.eat(state, "item.food.shrimp")
+	assert(over["ok"] and over["overeat"], "eating at full satiety is an overeat")
+	assert(state.food_cooldown > 0.0, "overeat sets a food lock")
+
+
+func test_combat_loop() -> void:
+	var state := _make_state()
+	InventorySystem.add(state, "item.weapon.sword.bronze", 1)
+	EquipmentSystem.equip(state, "item.weapon.sword.bronze")
+	assert(not CombatSystem.can_start(state, "enemy.t5.wolf")["ok"], "high tier locked at low Attack")
+	assert(CombatSystem.can_start(state, "enemy.t1.wolf")["ok"], "tier 1 area available")
+	var act := CombatSystem.make_activity(state, "enemy.t1.wolf")
+	state.activity = act
+	state.hp = state.max_hp()
+	var gold_before := state.gold
+	var killed := false
+	var respawned_full := false
+	for _i in range(400):
+		var events := CombatSystem.tick(state, act, 0.5)
+		if (events["combat"] as Dictionary).has("kill"):
+			killed = true
+			respawned_full = int(act["enemy_hp"]) == int(ContentRegistry.get_enemy("enemy.t1.wolf")["hp"])
+			break
+		if events.get("stop", false):
+			break
+	assert(killed, "player defeats at least one enemy")
+	assert(state.gold > gold_before, "kills grant gold")
+	assert(respawned_full, "enemy respawns at full HP on death")

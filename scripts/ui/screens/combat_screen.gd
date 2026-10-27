@@ -256,6 +256,7 @@ func _update_live() -> void:
 	_enemy_hp_bar.value = clampi(int(act["enemy_hp"]), 0, enemy_max)
 	_enemy_hp_label.text = "%d / %d HP" % [maxi(0, int(act["enemy_hp"])), enemy_max]
 	_enemy_sprite.modulate = Color(1, 0.7, 0.7) if str(enemy["rank"]) == "boss" else (Color(1, 0.85, 0.6) if str(enemy["rank"]) == "elite" else Color(1, 1, 1))
+	_player_sprite.modulate = Color(0.6, 0.6, 0.75) if float(act.get("stun", 0.0)) > 0.0 else Color(1, 1, 1)
 	_sequence_label.text = _sequence_text(act, enemy)
 	_start_button.text = "Stop Combat"
 	_start_button.disabled = false
@@ -268,11 +269,11 @@ func _sequence_text(act: Dictionary, enemy: Dictionary) -> String:
 	var index := CombatSystem.current_index(act, enemy)
 	var parts: Array = []
 	for i in range(sequence.size()):
-		var name := str(sequence[i]["name"])
+		var action_name := str(sequence[i]["name"])
 		if i == index:
-			parts.append("[color=#ffffff][b]%s[/b][/color]" % name)
+			parts.append("[color=#ffffff][b]%s[/b][/color]" % action_name)
 		else:
-			parts.append("[color=#8fa0b3]%s[/color]" % name)
+			parts.append("[color=#8fa0b3]%s[/color]" % action_name)
 	return "Enemy: " + "  →  ".join(parts)
 
 
