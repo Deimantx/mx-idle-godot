@@ -110,16 +110,16 @@ func test_smithing_reservation_and_output() -> void:
 	var state := _make_state()
 	InventorySystem.add(state, "item.ore.copper", 10)
 	InventorySystem.add(state, "item.ore.tin", 10)
-	assert(not SmithingSystem.can_start(state, "recipe.smithing.smelt.iron")["ok"], "locked smelt gated by level")
-	assert(SmithingSystem.can_start(state, "recipe.smithing.smelt.bronze")["ok"], "bronze smelt available")
-	var act := SmithingSystem.make_activity(state, "recipe.smithing.smelt.bronze")
+	assert(not CraftingSystem.can_start(state, "recipe.smithing.smelt.iron")["ok"], "locked smelt gated by level")
+	assert(CraftingSystem.can_start(state, "recipe.smithing.smelt.bronze")["ok"], "bronze smelt available")
+	var act := CraftingSystem.make_activity(state, "recipe.smithing.smelt.bronze")
 	assert(InventorySystem.count(state, "item.ore.copper") == 9, "inputs reserved on start")
-	var result := SmithingSystem.on_action(state, act)
+	var result := CraftingSystem.on_action(state, act)
 	assert(InventorySystem.count(state, "item.bar.bronze") == 1, "smelt produces a bar")
 	assert(InventorySystem.count(state, "item.ore.copper") == 8, "next batch reserved")
 	assert(not result.get("stop", false), "activity continues while materials last")
 	# Return reserved inputs when stopped.
-	SmithingSystem.return_reserved(state, act)
+	CraftingSystem.return_reserved(state, act)
 	assert(InventorySystem.count(state, "item.ore.copper") == 9, "reserved inputs returned on stop")
 
 

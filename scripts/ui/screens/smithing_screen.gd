@@ -45,7 +45,7 @@ func _build_lists() -> void:
 
 
 func _recipe_row(state: CharacterState, recipe: Dictionary) -> Control:
-	var check := SmithingSystem.can_start(state, str(recipe["id"]))
+	var check := CraftingSystem.can_start(state, str(recipe["id"]))
 	var button := Button.new()
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.custom_minimum_size = Vector2(0, 44)

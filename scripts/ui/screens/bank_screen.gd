@@ -77,6 +77,13 @@ func _row(item_id: String, item: Dictionary, qty: int) -> Control:
 
 
 func _equip(item_id: String) -> void:
+	var item := ContentRegistry.get_item(item_id)
+	if str(item.get("equip_slot", "")) == "food":
+		var food_res := FoodSystem.assign(GameSession.state, item_id)
+		if not food_res["ok"]:
+			EventBus.notification.emit(str(food_res["reason"]), "warning")
+		EventBus.state_changed.emit()
+		return
 	var res := EquipmentSystem.equip(GameSession.state, item_id)
 	if not res["ok"]:
 		EventBus.notification.emit(str(res["reason"]), "warning")

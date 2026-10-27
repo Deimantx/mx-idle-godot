@@ -114,6 +114,13 @@ func _stats_text(item_id: String) -> String:
 
 
 func _equip(item_id: String) -> void:
+	var item := ContentRegistry.get_item(item_id)
+	if str(item.get("equip_slot", "")) == "food":
+		var food_res := FoodSystem.assign(GameSession.state, item_id)
+		if not food_res["ok"]:
+			EventBus.notification.emit(str(food_res["reason"]), "warning")
+		EventBus.state_changed.emit()
+		return
 	var res := EquipmentSystem.equip(GameSession.state, item_id)
 	if not res["ok"]:
 		EventBus.notification.emit(str(res["reason"]), "warning")
@@ -122,6 +129,9 @@ func _equip(item_id: String) -> void:
 
 
 func _unequip(slot: String) -> void:
-	EquipmentSystem.unequip(GameSession.state, slot)
+	if slot in CharacterState.FOOD_SLOTS:
+		FoodSystem.clear_slot(GameSession.state, slot)
+	else:
+		EquipmentSystem.unequip(GameSession.state, slot)
 	EventBus.equipment_changed.emit()
 	EventBus.bank_changed.emit()
