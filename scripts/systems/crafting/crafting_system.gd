@@ -80,7 +80,7 @@ static func _work_required(recipe: Dictionary) -> int:
 	return maxi(12, int(round((28.0 + (tier - 1) * 8.0) * weight)))
 
 static func _hammer_power(recipe: Dictionary) -> int:
-	return maxi(3, 10 - int(maxi(1, int(recipe.get("tier", 1))) / 3))
+	return maxi(3, 10 - floori(float(maxi(1, int(recipe.get("tier", 1)))) / 3.0))
 
 static func _minimum_working_heat(recipe: Dictionary) -> float:
 	return minf(70.0, 25.0 + float(maxi(1, int(recipe.get("tier", 1))) - 1) * 5.0)
@@ -97,7 +97,7 @@ static func max_possible_batches(state: CharacterState, recipe_id: String) -> in
 		var per_batch := int(inputs[item_id])
 		if per_batch <= 0:
 			return 0
-		possible = mini(possible, int(InventorySystem.count(state, str(item_id)) / per_batch))
+		possible = mini(possible, floori(float(InventorySystem.count(state, str(item_id))) / float(per_batch)))
 	return maxi(0, possible)
 
 
