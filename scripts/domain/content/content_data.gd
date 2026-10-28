@@ -162,7 +162,7 @@ static func build_items() -> Dictionary:
 				"legs":
 					stats = {"defense_bonus": tier}
 				"gloves", "boots":
-					stats = {"defense_bonus": maxi(1, int(tier / 2))}
+					stats = {"defense_bonus": maxi(1, floori(float(tier) / 2.0))}
 				"shield":
 					stats = {"defense_bonus": tier, "block_bonus": tier}
 			out[item_id] = {
