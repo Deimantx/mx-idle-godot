@@ -65,7 +65,7 @@ func _rebuild() -> void:
 	_rebuild_categories()
 	for child in _grid.get_children():
 		child.queue_free()
-	var state := GameSession.state
+	var state = GameSession.state
 	if state == null:
 		return
 	var query := _search.text.strip_edges().to_lower()
@@ -97,7 +97,7 @@ func _select(item_id: String) -> void:
 
 
 func _show_detail(item_id: String) -> void:
-	var state := GameSession.state
+	var state = GameSession.state
 	if item_id == "" or state == null or not state.bank.has(item_id):
 		_detail.visible = false
 		_empty.visible = true
