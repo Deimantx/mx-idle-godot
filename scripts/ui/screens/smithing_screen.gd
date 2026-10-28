@@ -152,8 +152,8 @@ func _matches_forge_category(recipe: Dictionary) -> bool:
 	var id := output_id.to_lower()
 	var is_tool := category in ["tool", "tools"] or slot == "tool" or "pickaxe" in id or "hammer" in id
 	var is_shield := category in ["shield", "off-hand", "offhand"] or slot in ["off-hand", "offhand", "shield"] or "shield" in id or "bulwark" in id
-	var is_weapon := category in ["weapon", "weapons"] or slot == "weapon" or any(["sword", "axe", "mace", "dagger", "spear", "blade", "club", "hammer_weapon"] .map(func(token): return token in id))
-	var is_armour := category in ["armor", "armour", "helmet", "helm", "body", "legs", "gloves", "boots"] or slot in ["helmet", "head", "body", "chest", "legs", "hands", "feet", "armor", "armour"] or any(["helmet", "helm", "armor", "armour", "plate", "greaves", "gloves", "boots"] .map(func(token): return token in id))
+	var is_weapon := category in ["weapon", "weapons"] or slot == "weapon" or _id_has_any(id, ["sword", "axe", "mace", "dagger", "spear", "blade", "club"])
+	var is_armour := category in ["armor", "armour", "helmet", "helm", "body", "legs", "gloves", "boots"] or slot in ["helmet", "head", "body", "chest", "legs", "hands", "feet", "armor", "armour"] or _id_has_any(id, ["helmet", "helm", "armor", "armour", "plate", "greaves", "gloves", "boots"])
 	match selected:
 		1:
 			return is_weapon and not is_tool and not is_shield
@@ -166,6 +166,14 @@ func _matches_forge_category(recipe: Dictionary) -> bool:
 		5:
 			return not is_weapon and not is_armour and not is_shield and not is_tool
 	return true
+
+
+
+func _id_has_any(value: String, tokens: Array) -> bool:
+	for token in tokens:
+		if str(token) in value:
+			return true
+	return false
 
 
 func _on_recipe_selected(recipe_id: String) -> void:
