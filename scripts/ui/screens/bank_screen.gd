@@ -38,7 +38,7 @@ func _on_bank_changed() -> void:
 
 
 func _rebuild_categories() -> void:
-	var state := GameSession.state
+	var state = GameSession.state
 	_category.clear()
 	_category.add_item("All categories")
 	_category.set_item_metadata(0, "all")
