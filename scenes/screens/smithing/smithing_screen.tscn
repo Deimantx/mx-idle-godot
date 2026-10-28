@@ -138,6 +138,25 @@ theme_type_variation = &"Small"
 button_pressed = true
 text = "Show locked"
 
+[node name="ForgeCategoryFilter" type="OptionButton" parent="Page/Body/Browser/BrowserVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+item_count = 6
+selected = 0
+popup/item_0/text = "All forging"
+popup/item_0/id = 0
+popup/item_1/text = "Weapons"
+popup/item_1/id = 1
+popup/item_2/text = "Armor"
+popup/item_2/id = 2
+popup/item_3/text = "Shields / Off-hand"
+popup/item_3/id = 3
+popup/item_4/text = "Tools"
+popup/item_4/id = 4
+popup/item_5/text = "Other"
+popup/item_5/id = 5
+
 [node name="Tabs" type="TabContainer" parent="Page/Body/Browser/BrowserVBox"]
 layout_mode = 2
 size_flags_vertical = 3
