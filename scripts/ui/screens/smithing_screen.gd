@@ -8,6 +8,7 @@ const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 @onready var _search: LineEdit = %RecipeSearch
 @onready var _tier_filter: OptionButton = %TierFilter
 @onready var _forge_category_filter: OptionButton = %ForgeCategoryFilter
+@onready var _batch_amount: OptionButton = %BatchAmount
 @onready var _available_filter: CheckButton = %AvailableFilter
 @onready var _affordable_filter: CheckButton = %AffordableFilter
 @onready var _locked_filter: CheckButton = %LockedFilter
@@ -21,6 +22,7 @@ const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 var _selected: String = ""
 var _rows: Dictionary = {}
 var _recipe_cache: Dictionary = {}
+var _batch_count_by_id := {0: 1, 1: 5, 2: 10, 3: 0}
 
 
 func _ready() -> void:
@@ -28,6 +30,7 @@ func _ready() -> void:
 	_search.text_changed.connect(func(_text: String): _build_lists())
 	_tier_filter.item_selected.connect(func(_index: int): _build_lists())
 	_forge_category_filter.item_selected.connect(func(_index: int): _build_lists())
+	_batch_amount.item_selected.connect(func(_index: int): _update_batch_hint())
 	_available_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_affordable_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_locked_filter.toggled.connect(func(_pressed: bool): _build_lists())
@@ -62,6 +65,12 @@ func _on_bank_changed() -> void:
 	if is_visible_in_tree():
 		_build_lists()
 		_update_active()
+
+
+func _update_batch_hint() -> void:
+	# Kept separate so the amount selector can be refreshed without rebuilding recipes.
+	if is_instance_valid(_batch_amount):
+		_batch_amount.tooltip_text = ["One batch", "Five batches", "Ten batches", "Continue until materials run out"][_batch_amount.selected]
 
 
 func _stop() -> void:
@@ -149,13 +158,21 @@ func _matches_forge_category(recipe: Dictionary) -> bool:
 	var selected := _forge_category_filter.selected
 	if selected <= 0:
 		return true
+	var explicit_category := str(recipe.get("forge_category", "")).to_lower()
+	if not explicit_category.is_empty():
+		match selected:
+			1: return explicit_category == "weapon"
+			2: return explicit_category in ["armor", "helmet", "gloves", "boots"]
+			3: return explicit_category == "shield"
+			4: return explicit_category == "tool"
+			5: return explicit_category == "other"
 	var outputs: Dictionary = recipe.get("output", {})
 	if outputs.is_empty():
 		return selected == 5
 	var output_id := str(outputs.keys()[0])
 	var item: Dictionary = ContentRegistry.get_item(output_id)
 	var category := str(item.get("category", "")).to_lower()
-	var slot := str(item.get("slot", "")).to_lower()
+	var slot := str(item.get("equip_slot", "")).to_lower()
 	var id := output_id.to_lower()
 	var is_tool := category in ["tool", "tools"] or slot == "tool" or "pickaxe" in id or "hammer" in id
 	var is_shield := category in ["shield", "off-hand", "offhand"] or slot in ["off-hand", "offhand", "shield"] or "shield" in id or "bulwark" in id
@@ -194,7 +211,9 @@ func _on_recipe_selected(recipe_id: String) -> void:
 	if not check.get("ok", false):
 		EventBus.notification.emit(str(check.get("reason", "Cannot start recipe.")), "warning")
 		return
-	var result: Dictionary = GameSession.start_activity("smithing", recipe_id)
+	var batch_index := _batch_amount.selected
+	var requested_batches := int(_batch_count_by_id.get(batch_index, 1))
+	var result: Dictionary = GameSession.start_activity("smithing", recipe_id, requested_batches)
 	if not result.get("ok", false):
 		EventBus.notification.emit(str(result.get("reason", "Cannot start recipe.")), "warning")
 	_build_lists()
@@ -254,7 +273,11 @@ func _update_active() -> void:
 		_active_name.text = str(recipe.get("name", recipe_id)).to_upper()
 		_active_info.text = "BATCH IN PROGRESS  ·  %.1fs cycle  ·  %d XP" % [duration, int(recipe.get("xp", 0))]
 		_active_bar.value = clampf(elapsed / total, 0.0, 1.0)
-		_rate_label.text = "%s batches / hour" % UiUtil.format_number(int(3600.0 / duration))
+		var rate := int(3600.0 / duration)
+		_rate_label.text = "%s batches / hour" % UiUtil.format_number(rate)
+		var remaining := int(activity.get("batches_remaining", 0))
+		if bool(activity.get("finite_order", false)):
+			_rate_label.text += "  ·  %d left" % remaining
 		%StopButton.disabled = false
 		%ProgressCaption.text = "BATCH %d%% COMPLETE" % int(_active_bar.value * 100.0)
 	_update_detail(_selected if not _selected.is_empty() else recipe_id)

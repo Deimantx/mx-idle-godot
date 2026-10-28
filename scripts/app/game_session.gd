@@ -63,7 +63,7 @@ func save() -> void:
 
 
 # --- Activity control -------------------------------------------------------
-func start_activity(type: String, target: String) -> Dictionary:
+func start_activity(type: String, target: String, batch_count: int = 0) -> Dictionary:
 	if state == null:
 		return {"ok": false, "reason": "No character loaded."}
 	var check := {}
@@ -90,7 +90,7 @@ func start_activity(type: String, target: String) -> Dictionary:
 		"fishing":
 			state.activity = FishingSystem.make_activity(state, target)
 		"smithing", "cooking":
-			state.activity = CraftingSystem.make_activity(state, target)
+			state.activity = CraftingSystem.make_activity(state, target, batch_count)
 		"combat":
 			state.activity = CombatSystem.make_activity(state, target)
 	state.activity["started_unix"] = int(Time.get_unix_time_from_system())

@@ -57,9 +57,12 @@ const FORGE_TEMPLATES := [
 	{"kind": "sword", "slot": "weapon", "bars": 2, "id_seg": "weapon.sword", "label": "Sword", "damage_type": "slash"},
 	{"kind": "spear", "slot": "weapon", "bars": 2, "id_seg": "weapon.spear", "label": "Spear", "damage_type": "stab"},
 	{"kind": "mace", "slot": "weapon", "bars": 3, "id_seg": "weapon.mace", "label": "Mace", "damage_type": "crush"},
-	{"kind": "helm", "slot": "head", "bars": 2, "id_seg": "armor.helm", "label": "Helm"},
-	{"kind": "body", "slot": "body", "bars": 3, "id_seg": "armor.body", "label": "Platebody"},
-	{"kind": "legs", "slot": "legs", "bars": 3, "id_seg": "armor.legs", "label": "Platelegs"},
+	{"kind": "shield", "slot": "off_hand", "bars": 2, "id_seg": "offhand.shield", "label": "Shield"},
+	{"kind": "helm", "slot": "head", "bars": 2, "id_seg": "armor.helm", "label": "Helmet", "forge_category": "helmet"},
+	{"kind": "body", "slot": "body", "bars": 3, "id_seg": "armor.body", "label": "Body Armor"},
+	{"kind": "legs", "slot": "legs", "bars": 3, "id_seg": "armor.legs", "label": "Leg Armor"},
+	{"kind": "gloves", "slot": "hands", "bars": 2, "id_seg": "armor.gloves", "label": "Gloves"},
+	{"kind": "boots", "slot": "feet", "bars": 2, "id_seg": "armor.boots", "label": "Boots"},
 ]
 
 # Fish species, one per tier. Raw catch and its cooked form.
