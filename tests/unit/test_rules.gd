@@ -201,3 +201,17 @@ func test_combat_loop() -> void:
 	assert(killed, "player defeats at least one enemy")
 	assert(state.gold > gold_before, "kills grant gold")
 	assert(respawned_full, "enemy respawns at full HP on death")
+
+func test_smithing_finite_batch_order() -> void:
+	var state := _make_state()
+	InventorySystem.add(state, "item.ore.copper", 10)
+	InventorySystem.add(state, "item.ore.tin", 10)
+	var act := CraftingSystem.make_activity(state, "recipe.smithing.smelt.bronze", 2)
+	act["finite_order"] = true
+	assert(int(act.get("batches_remaining", 0)) == 2, "finite order stores requested batch count")
+	var first := CraftingSystem.on_action(state, act)
+	assert(not first.get("stop", false), "finite order continues before final batch")
+	var second := CraftingSystem.on_action(state, act)
+	assert(second.get("stop", false), "finite order stops after requested batch count")
+	assert(second.get("reason", "") == "Order complete.", "finite order reports completion")
+	CraftingSystem.return_reserved(state, act)

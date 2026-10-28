@@ -251,6 +251,21 @@ text = "No active production"
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="BatchAmount" type="OptionButton" parent="Page/Body/Workshop/WorkshopVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+item_count = 4
+selected = 0
+popup/item_0/text = "Make 1"
+popup/item_0/id = 0
+popup/item_1/text = "Make 5"
+popup/item_1/id = 1
+popup/item_2/text = "Make 10"
+popup/item_2/id = 2
+popup/item_3/text = "Continue until out"
+popup/item_3/id = 3
+
 [node name="StopButton" type="Button" parent="Page/Body/Workshop/WorkshopVBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)

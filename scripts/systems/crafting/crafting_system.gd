@@ -21,7 +21,7 @@ static func can_start(state: CharacterState, recipe_id: String) -> Dictionary:
 	return {"ok": true, "reason": ""}
 
 
-static func make_activity(state: CharacterState, recipe_id: String) -> Dictionary:
+static func make_activity(state: CharacterState, recipe_id: String, batch_count: int = 0) -> Dictionary:
 	var recipe := ContentRegistry.get_recipe(recipe_id)
 	var act := {
 		"type": str(recipe["profession"]),
@@ -29,6 +29,10 @@ static func make_activity(state: CharacterState, recipe_id: String) -> Dictionar
 		"time": 0.0,
 		"duration": float(recipe["time"]),
 		"reserved": {},
+		# 0 means keep producing until materials run out; positive values are finite orders.
+		"batches_remaining": maxi(0, batch_count),
+		"finite_order": batch_count > 0,
+		"batches_completed": 0,
 	}
 	reserve(state, act)
 	return act
@@ -64,14 +68,18 @@ static func on_action(state: CharacterState, act: Dictionary) -> Dictionary:
 		items[item_id] = amt
 
 	var xp := int(recipe["xp"])
+	act["batches_completed"] = int(act.get("batches_completed", 0)) + 1
+	if int(act.get("batches_remaining", 0)) > 0:
+		act["batches_remaining"] = int(act["batches_remaining"]) - 1
 	var levels := state.add_xp(skill, xp)
 
 	# Start the next batch; stop the activity when materials run out.
-	var stopped := not reserve(state, act)
+	var finite_order_done := int(act.get("batches_remaining", 0)) == 0 and bool(act.get("finite_order", false))
+	var stopped := finite_order_done or not reserve(state, act)
 	return {
 		"items": items,
 		"xp": {skill: xp},
 		"levels": {skill: levels},
 		"stop": stopped,
-		"reason": "Out of materials." if stopped else "",
+		"reason": ("Order complete." if finite_order_done else "Out of materials.") if stopped else "",
 	}
