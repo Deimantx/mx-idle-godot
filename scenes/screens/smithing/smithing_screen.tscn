@@ -152,46 +152,55 @@ metadata/category = "all"
 
 [node name="CategoryWeapons" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Weapons"
 metadata/category = "weapon"
 
 [node name="CategoryShields" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Shields"
 metadata/category = "shield"
 
 [node name="CategoryHelmets" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Helmets"
 metadata/category = "helmet"
 
 [node name="CategoryBodyArmor" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Body"
 metadata/category = "body_armor"
 
 [node name="CategoryLegArmor" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Legs"
 metadata/category = "leg_armor"
 
 [node name="CategoryGloves" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Gloves"
 metadata/category = "gloves"
 
 [node name="CategoryBoots" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Boots"
 metadata/category = "boots"
 
 [node name="CategoryTools" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Tools"
 metadata/category = "tool"
 
 [node name="CategoryOther" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
 layout_mode = 2
+toggle_mode = true
 text = "Other"
 metadata/category = "other"
 
@@ -303,7 +312,7 @@ text = "10"
 alignment = 1
 select_all_on_focus = true
 
-[node name="MakeButtons" type="HBoxContainer" parent="Page/Body/Workshop/WorkshopVBox/MakeButtons"]
+[node name="MakeButtons" type="HBoxContainer" parent="Page/Body/Workshop/WorkshopVBox"]
 layout_mode = 2
 theme_override_constants/separation = 5
 

@@ -268,11 +268,14 @@ func _update_active() -> void:
 		_active_name.text = str(recipe.get("name", recipe_id)).to_upper()
 		if str(recipe.get("kind", "")) == "forge":
 			var work_max := maxf(1.0, float(activity.get("work_required", 1)))
+			var work_done := work_max * clampf(elapsed / total, 0.0, 1.0)
+			var strikes_done := floori(work_done / maxf(1.0, float(activity.get("hammer_power", 1))))
+			var heat := maxf(0.0, 100.0 - float(strikes_done % 10) * 10.0)
 			_active_info.text = "FORGING · %.1fs estimated cycle · %d XP" % [duration, int(recipe.get("xp", 0))]
-			%HeatLabel.text = "WORKPIECE HEAT  %.0f / 100" % float(activity.get("heat", 100.0))
-			%HeatBar.value = float(activity.get("heat", 100.0)) / 100.0
-			%WorkLabel.text = "WORK REMAINING  %d / %d · HAMMER POWER %d" % [int(activity.get("work_remaining", work_max)), int(work_max), int(activity.get("hammer_power", 1))]
-			%WorkBar.value = clampf(1.0 - float(activity.get("work_remaining", work_max)) / work_max, 0.0, 1.0)
+			%HeatLabel.text = "WORKPIECE HEAT  %.0f / 100" % heat
+			%HeatBar.value = heat / 100.0
+			%WorkLabel.text = "WORK REMAINING  %d / %d · HAMMER POWER %d" % [int(ceil(maxf(0.0, work_max - work_done))), int(work_max), int(activity.get("hammer_power", 1))]
+			%WorkBar.value = clampf(work_done / work_max, 0.0, 1.0)
 		else:
 			_active_info.text = "SMELTING · %.1fs cycle · %d XP" % [duration, int(recipe.get("xp", 0))]
 			%HeatLabel.text = "FURNACE HEAT / SMELTING"
