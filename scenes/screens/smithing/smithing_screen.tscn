@@ -134,36 +134,66 @@ text = "Have materials"
 [node name="LockedFilter" type="CheckButton" parent="Page/Body/Browser/BrowserVBox/FilterRow2"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"Small"
 button_pressed = true
 text = "Show locked"
 
-[node name="ForgeCategoryFilter" type="OptionButton" parent="Page/Body/Browser/BrowserVBox"]
+[node name="ForgeCategories" type="HBoxContainer" parent="Page/Body/Browser/BrowserVBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-item_count = 10
-selected = 0
-popup/item_0/text = "All forging"
-popup/item_0/id = 0
-popup/item_1/text = "Weapons"
-popup/item_1/id = 1
-popup/item_2/text = "Shields / Off-hand"
-popup/item_2/id = 2
-popup/item_3/text = "Helmets"
-popup/item_3/id = 3
-popup/item_4/text = "Body Armor"
-popup/item_4/id = 4
-popup/item_5/text = "Leg Armor"
-popup/item_5/id = 5
-popup/item_6/text = "Gloves"
-popup/item_6/id = 6
-popup/item_7/text = "Boots"
-popup/item_7/id = 7
-popup/item_8/text = "Tools"
-popup/item_8/id = 8
-popup/item_9/text = "Other"
-popup/item_9/id = 9
+theme_override_constants/separation = 3
+visible = false
+
+[node name="CategoryAll" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "All"
+metadata/category = "all"
+
+[node name="CategoryWeapons" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Weapons"
+metadata/category = "weapon"
+
+[node name="CategoryShields" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Shields"
+metadata/category = "shield"
+
+[node name="CategoryHelmets" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Helmets"
+metadata/category = "helmet"
+
+[node name="CategoryBodyArmor" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Body"
+metadata/category = "body_armor"
+
+[node name="CategoryLegArmor" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Legs"
+metadata/category = "leg_armor"
+
+[node name="CategoryGloves" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Gloves"
+metadata/category = "gloves"
+
+[node name="CategoryBoots" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Boots"
+metadata/category = "boots"
+
+[node name="CategoryTools" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Tools"
+metadata/category = "tool"
+
+[node name="CategoryOther" type="Button" parent="Page/Body/Browser/BrowserVBox/ForgeCategories"]
+layout_mode = 2
+text = "Other"
+metadata/category = "other"
 
 [node name="Tabs" type="TabContainer" parent="Page/Body/Browser/BrowserVBox"]
 layout_mode = 2
@@ -259,22 +289,67 @@ text = "No active production"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BatchAmount" type="OptionButton" parent="Page/Body/Workshop/WorkshopVBox"]
+[node name="OrderLabel" type="Label" parent="Page/Body/Workshop/WorkshopVBox"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "PRODUCTION ORDER"
+
+[node name="QuantityInput" type="LineEdit" parent="Page/Body/Workshop/WorkshopVBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
-item_count = 5
-selected = 0
-popup/item_0/text = "Make 1"
-popup/item_0/id = 0
-popup/item_1/text = "Make 5"
-popup/item_1/id = 1
-popup/item_2/text = "Make 10"
-popup/item_2/id = 2
-popup/item_3/text = "Make all possible"
-popup/item_3/id = 3
-popup/item_4/text = "Continue until out"
-popup/item_4/id = 4
+placeholder_text = "Enter quantity for Make X"
+text = "10"
+alignment = 1
+select_all_on_focus = true
+
+[node name="MakeButtons" type="HBoxContainer" parent="Page/Body/Workshop/WorkshopVBox/MakeButtons"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="MakeOneButton" type="Button" parent="Page/Body/Workshop/WorkshopVBox/MakeButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Make one"
+
+[node name="MakeXButton" type="Button" parent="Page/Body/Workshop/WorkshopVBox/MakeButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Make X"
+
+[node name="MakeAllButton" type="Button" parent="Page/Body/Workshop/WorkshopVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Make all · until out"
+
+[node name="HeatLabel" type="Label" parent="Page/Body/Workshop/WorkshopVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Small"
+text = "HEAT  —"
+
+[node name="HeatBar" type="ProgressBar" parent="Page/Body/Workshop/WorkshopVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+max_value = 1.0
+show_percentage = false
+
+[node name="WorkLabel" type="Label" parent="Page/Body/Workshop/WorkshopVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Small"
+text = "WORK  —"
+
+[node name="WorkBar" type="ProgressBar" parent="Page/Body/Workshop/WorkshopVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+max_value = 1.0
+show_percentage = false
 
 [node name="StopButton" type="Button" parent="Page/Body/Workshop/WorkshopVBox"]
 unique_name_in_owner = true

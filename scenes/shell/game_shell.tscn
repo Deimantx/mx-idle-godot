@@ -229,6 +229,13 @@ layout_mode = 2
 theme_type_variation = &"Gold"
 text = "0 g"
 
+[node name="FPSLabel" type="Label" parent="Root/Rows/Content/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "FPS --"
+tooltip_text = "Rendered frames per second"
+
 [node name="ScreenHost" type="MarginContainer" parent="Root/Rows/Content"]
 unique_name_in_owner = true
 layout_mode = 2

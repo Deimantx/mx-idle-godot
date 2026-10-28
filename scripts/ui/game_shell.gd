@@ -48,6 +48,8 @@ const SCREEN_SUBTITLES := {
 @onready var _activity: StatusBadge = %ActivityBadge
 @onready var _profile_label: Label = %ProfileLabel
 @onready var _gold_label: Label = %GoldLabel
+@onready var _fps_label: Label = %FPSLabel
+var _fps_refresh_accum: float = 0.0
 @onready var _toast_list: VBoxContainer = %ToastList
 
 var _screens: Dictionary = {}
@@ -56,6 +58,7 @@ var _current: String = ""
 
 
 func _ready() -> void:
+	set_process(true)
 	for id in SCREEN_SCENES.keys():
 		var scene: PackedScene = load(SCREEN_SCENES[id])
 		var inst := scene.instantiate()
@@ -112,6 +115,16 @@ func show_screen(id: String) -> void:
 func _back_to_profiles() -> void:
 	GameSession.unload()
 	get_tree().change_scene_to_file("res://scenes/screens/profiles/profile_select.tscn")
+
+
+func _process(delta: float) -> void:
+	_fps_refresh_accum += delta
+	if _fps_refresh_accum >= 0.25:
+		_fps_refresh_accum = 0.0
+		var fps := Engine.get_frames_per_second()
+		_fps_label.text = "FPS %d" % fps
+		_fps_label.tooltip_text = "Rendered frames per second. Frame time: %.1f ms" % (1000.0 / maxf(1.0, float(fps)))
+		_fps_label.add_theme_color_override("font_color", Color("8ebf91") if fps >= 55 else Color("d7b66d") if fps >= 30 else Color("d47a70"))
 
 
 func _refresh_status() -> void:

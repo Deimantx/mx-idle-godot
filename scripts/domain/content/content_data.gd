@@ -220,6 +220,8 @@ static func build_recipes() -> Dictionary:
 			"level": tier_start_level(tier),
 			"tier": tier,
 			"time": 2.0,
+			"furnace_heat_requirement": 100 + (tier - 1) * 8,
+			"furnace_warmup": 0.35 + (tier - 1) * 0.12,
 			"xp": 15 * tier * tier,
 		}
 		for tmpl in FORGE_TEMPLATES:
@@ -237,6 +239,11 @@ static func build_recipes() -> Dictionary:
 				"level": tier_start_level(tier),
 				"tier": tier,
 				"time": 3.0,
+				"work_required": int(round((28.0 + (tier - 1) * 8.0) * (1.0 if str(tmpl.get("forge_category", "")) != "body_armor" else 1.7))),
+				"minimum_working_heat": minf(70.0, 25.0 + (tier - 1) * 5.0),
+				"initial_workpiece_heat": 100,
+				"heat_loss_per_strike": 10,
+				"reheat_time": 2.0 + (tier - 1) * 0.12,
 				"xp": 25 * tier * tier,
 			}
 	for fish in FISH:

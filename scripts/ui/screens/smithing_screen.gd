@@ -7,8 +7,8 @@ const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 @onready var _forge_list: VBoxContainer = %ForgeList
 @onready var _search: LineEdit = %RecipeSearch
 @onready var _tier_filter: OptionButton = %TierFilter
-@onready var _forge_category_filter: OptionButton = %ForgeCategoryFilter
-@onready var _batch_amount: OptionButton = %BatchAmount
+@onready var _forge_categories: HBoxContainer = %ForgeCategories
+@onready var _quantity_input: LineEdit = %QuantityInput
 @onready var _available_filter: CheckButton = %AvailableFilter
 @onready var _affordable_filter: CheckButton = %AffordableFilter
 @onready var _locked_filter: CheckButton = %LockedFilter
@@ -22,15 +22,23 @@ const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 var _selected: String = ""
 var _rows: Dictionary = {}
 var _recipe_cache: Dictionary = {}
-var _batch_count_by_id := {0: 1, 1: 5, 2: 10, 3: -1, 4: 0}
+var _forge_category := "all"
+var _forge_category_buttons: Dictionary = {}
 
 
 func _ready() -> void:
 	%StopButton.pressed.connect(_stop)
 	_search.text_changed.connect(func(_text: String): _build_lists())
 	_tier_filter.item_selected.connect(func(_index: int): _build_lists())
-	_forge_category_filter.item_selected.connect(func(_index: int): _build_lists())
-	_batch_amount.item_selected.connect(func(_index: int): _update_batch_hint())
+		%MakeOneButton.pressed.connect(func(): _start_selected(1))
+	%MakeXButton.pressed.connect(func(): _start_selected(_read_quantity()))
+	%MakeAllButton.pressed.connect(func(): _start_selected(0))
+	_quantity_input.text_submitted.connect(func(_text: String): _start_selected(_read_quantity()))
+	for child in _forge_categories.get_children():
+		if child is Button:
+			var category := str(child.get_meta("category", "all"))
+			_forge_category_buttons[category] = child
+			child.pressed.connect(_select_forge_category.bind(category))
 	_available_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_affordable_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_locked_filter.toggled.connect(func(_pressed: bool): _build_lists())
@@ -48,7 +56,8 @@ func _ready() -> void:
 
 
 func _sync_category_filter() -> void:
-	_forge_category_filter.visible = _tabs.current_tab == 1
+	_forge_categories.visible = _tabs.current_tab == 1
+	_update_category_buttons()
 
 
 func refresh() -> void:
@@ -65,12 +74,6 @@ func _on_bank_changed() -> void:
 	if is_visible_in_tree():
 		_build_lists()
 		_update_active()
-
-
-func _update_batch_hint() -> void:
-	# Kept separate so the amount selector can be refreshed without rebuilding recipes.
-	if is_instance_valid(_batch_amount):
-		_batch_amount.tooltip_text = ["One batch", "Five batches", "Ten batches", "All currently possible batches", "Continue until materials run out"][_batch_amount.selected]
 
 
 func _stop() -> void:
@@ -155,21 +158,9 @@ func _build_lists() -> void:
 
 
 func _matches_forge_category(recipe: Dictionary) -> bool:
-	var selected := _forge_category_filter.selected
-	if selected <= 0:
+	if _forge_category == "all":
 		return true
-	var category := str(recipe.get("forge_category", "other")).to_lower()
-	match selected:
-		1: return category == "weapon"
-		2: return category == "shield"
-		3: return category == "helmet"
-		4: return category == "body_armor"
-		5: return category == "leg_armor"
-		6: return category == "gloves"
-		7: return category == "boots"
-		8: return category == "tool"
-		9: return category == "other"
-	return true
+	return str(recipe.get("forge_category", "other")).to_lower() == _forge_category
 
 
 
@@ -184,20 +175,40 @@ func _on_recipe_selected(recipe_id: String) -> void:
 	_selected = recipe_id
 	_update_detail(recipe_id)
 	_highlight()
-	var state = GameSession.state
-	if state == null:
+	_update_active()
+
+
+func _read_quantity() -> int:
+	var amount := _quantity_input.text.strip_edges().to_int()
+	if amount <= 0:
+		EventBus.notification.emit("Enter a quantity greater than zero.", "warning")
+		return -1
+	return mini(amount, 1000000)
+
+
+func _start_selected(quantity: int) -> void:
+	if _selected.is_empty():
+		EventBus.notification.emit("Select a recipe first.", "warning")
 		return
-	var check: Dictionary = CraftingSystem.can_start(state, recipe_id)
-	if not check.get("ok", false):
-		EventBus.notification.emit(str(check.get("reason", "Cannot start recipe.")), "warning")
+	if quantity < 0:
 		return
-	var batch_index := _batch_amount.selected
-	var requested_batches := int(_batch_count_by_id.get(batch_index, 1))
-	var result: Dictionary = GameSession.start_activity("smithing", recipe_id, requested_batches)
+	var result: Dictionary = GameSession.start_activity("smithing", _selected, quantity)
 	if not result.get("ok", false):
 		EventBus.notification.emit(str(result.get("reason", "Cannot start recipe.")), "warning")
 	_build_lists()
 	_update_active()
+
+
+func _select_forge_category(category: String) -> void:
+	_forge_category = category
+	_update_category_buttons()
+	_build_lists()
+
+
+func _update_category_buttons() -> void:
+	for category in _forge_category_buttons:
+		var button: Button = _forge_category_buttons[category]
+		button.button_pressed = str(category) == _forge_category
 
 
 func _active_id() -> String:
@@ -237,8 +248,12 @@ func _update_active() -> void:
 	var recipe_id := _active_id()
 	if state == null or recipe_id.is_empty():
 		_active_name.text = "WORKBENCH IDLE"
-		_active_info.text = "Choose a recipe and start a batch."
+		_active_info.text = "Select a recipe, then choose Make one, Make X or Make all."
 		_active_bar.value = 0.0
+		%HeatLabel.text = "HEAT  —"
+		%HeatBar.value = 0.0
+		%WorkLabel.text = "WORK  —"
+		%WorkBar.value = 0.0
 		_rate_label.text = "No active production"
 		%StopButton.disabled = true
 		%ProgressCaption.text = "READY WHEN YOU ARE"
@@ -246,20 +261,32 @@ func _update_active() -> void:
 		var recipe: Dictionary = ContentRegistry.get_recipe(recipe_id)
 		if recipe.is_empty():
 			return
-		var duration := maxf(0.01, float(recipe.get("time", 1.0)))
+		var duration := maxf(0.01, float(state.activity.get("duration", recipe.get("time", 1.0))))
 		var activity: Dictionary = state.activity
 		var elapsed := float(activity.get("time", 0.0))
 		var total := maxf(0.01, float(activity.get("duration", duration)))
 		_active_name.text = str(recipe.get("name", recipe_id)).to_upper()
-		_active_info.text = "BATCH IN PROGRESS  ·  %.1fs cycle  ·  %d XP" % [duration, int(recipe.get("xp", 0))]
-		_active_bar.value = clampf(elapsed / total, 0.0, 1.0)
+		if str(recipe.get("kind", "")) == "forge":
+			var work_max := maxf(1.0, float(activity.get("work_required", 1)))
+			_active_info.text = "FORGING · %.1fs estimated cycle · %d XP" % [duration, int(recipe.get("xp", 0))]
+			%HeatLabel.text = "WORKPIECE HEAT  %.0f / 100" % float(activity.get("heat", 100.0))
+			%HeatBar.value = float(activity.get("heat", 100.0)) / 100.0
+			%WorkLabel.text = "WORK REMAINING  %d / %d · HAMMER POWER %d" % [int(activity.get("work_remaining", work_max)), int(work_max), int(activity.get("hammer_power", 1))]
+			%WorkBar.value = clampf(1.0 - float(activity.get("work_remaining", work_max)) / work_max, 0.0, 1.0)
+		else:
+			_active_info.text = "SMELTING · %.1fs cycle · %d XP" % [duration, int(recipe.get("xp", 0))]
+			%HeatLabel.text = "FURNACE HEAT / SMELTING"
+			%HeatBar.value = clampf(elapsed / total, 0.0, 1.0)
+			%WorkLabel.text = "BATCH PROCESSING"
+			%WorkBar.value = clampf(elapsed / total, 0.0, 1.0)
+		_active_bar.value = clampf(elapsed / total, 0.0, 1.0
 		var rate := int(3600.0 / duration)
 		_rate_label.text = "%s batches / hour" % UiUtil.format_number(rate)
 		var remaining := int(activity.get("batches_remaining", 0))
 		if bool(activity.get("finite_order", false)):
 			_rate_label.text += "  ·  %d / %d left" % [remaining, int(activity.get("batches_requested", remaining))]
 		else:
-			_rate_label.text += "  ·  INDEFINITE"
+			_rate_label.text += "  ·  ALL UNTIL OUT"
 		%StopButton.disabled = false
 		%ProgressCaption.text = "BATCH %d%% COMPLETE" % int(_active_bar.value * 100.0)
 	_update_detail(_selected if not _selected.is_empty() else recipe_id)
@@ -294,7 +321,7 @@ func _update_detail(recipe_id: String) -> void:
 	lines.append("REQUIRED LEVEL|%d" % int(recipe.get("level", 1)))
 	lines.append("PRODUCTION TIME|%.1f seconds" % float(recipe.get("time", 0.0)))
 	lines.append("SMITHING XP|%d per batch" % int(recipe.get("xp", 0)))
-	lines.append("PRODUCTION MODE|%s" % ["One batch", "Five batches", "Ten batches", "All possible", "Indefinite"][_batch_amount.selected])
+	lines.append("PRODUCTION|Make one / Make X / Make all until resources run out")
 	var description := ""
 	if not outputs.is_empty():
 		description = str(ContentRegistry.get_item(str(outputs.keys()[0])).get("description", ""))

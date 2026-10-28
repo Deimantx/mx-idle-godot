@@ -1,9 +1,7 @@
 class_name CraftingSystem
 extends RefCounted
 
-## Shared timed production resolver. One batch is reserved while its timer runs.
-## Completion consumes inputs and grants outputs + XP together. Cancellation
-## returns reserved inputs and discards partial timer progress.
+## Production orders reserve one batch at a time and repeat until the order ends or materials run out.
 
 
 static func can_start(state: CharacterState, recipe_id: String) -> Dictionary:
@@ -36,13 +34,15 @@ static func make_activity(state: CharacterState, recipe_id: String, batch_count:
 	var recipe := ContentRegistry.get_recipe(recipe_id)
 	if recipe.is_empty():
 		return {}
-	var requested := max_possible_batches(state, recipe_id) if batch_count == -1 else batch_count
-	var finite_order := batch_count != 0
+	var requested := batch_count
+	var finite_order := batch_count > 0
 	var activity := {
 		"type": str(recipe["profession"]), "target": recipe_id,
-		"time": 0.0, "duration": maxf(0.05, float(recipe.get("time", 1.0))),
+		"time": 0.0, "duration": _batch_duration(recipe),
 		"reserved": {},
-		"production_mode": "indefinite" if batch_count == 0 else "all" if batch_count == -1 else "quantity",
+		"heat": 100.0, "work_required": _work_required(recipe), "work_remaining": _work_required(recipe),
+		"minimum_working_heat": _minimum_working_heat(recipe), "hammer_power": _hammer_power(recipe),
+		"production_mode": "quantity" if finite_order else "all",
 		"batches_requested": maxi(0, requested),
 		"batches_remaining": maxi(0, requested),
 		"batches_completed": 0, "finite_order": finite_order,
@@ -53,6 +53,37 @@ static func make_activity(state: CharacterState, recipe_id: String, batch_count:
 		return {}
 	return activity
 
+
+static func _batch_duration(recipe: Dictionary) -> float:
+	var base := maxf(0.05, float(recipe.get("time", 1.0)))
+	if str(recipe.get("profession", "")) != "smithing":
+		return base
+	var tier := maxi(1, int(recipe.get("tier", 1)))
+	if str(recipe.get("kind", "")) == "smelt":
+		return base + float(recipe.get("furnace_warmup", 0.35 + (tier - 1) * 0.12))
+	var work := _work_required(recipe)
+	var strikes := ceili(float(work) / float(_hammer_power(recipe)))
+	var reheats := maxi(0, ceili(float(strikes * 10) / maxf(1.0, 100.0 - _minimum_working_heat(recipe))) - 1)
+	return base + float(strikes) * 0.65 + float(reheats) * float(recipe.get("reheat_time", 2.0 + (tier - 1) * 0.12))
+
+static func _work_required(recipe: Dictionary) -> int:
+	if str(recipe.get("kind", "")) != "forge":
+		return 0
+	var tier := maxi(1, int(recipe.get("tier", 1)))
+	var weight := 1.0
+	match str(recipe.get("forge_category", "other")):
+		"weapon": weight = 1.15
+		"shield": weight = 1.25
+		"helmet", "gloves", "boots": weight = 0.8
+		"body_armor": weight = 1.7
+		"leg_armor": weight = 1.25
+	return maxi(12, int(round((28.0 + (tier - 1) * 8.0) * weight)))
+
+static func _hammer_power(recipe: Dictionary) -> int:
+	return maxi(3, 10 - int(maxi(1, int(recipe.get("tier", 1))) / 3))
+
+static func _minimum_working_heat(recipe: Dictionary) -> float:
+	return minf(70.0, 25.0 + float(maxi(1, int(recipe.get("tier", 1))) - 1) * 5.0)
 
 static func max_possible_batches(state: CharacterState, recipe_id: String) -> int:
 	var recipe := ContentRegistry.get_recipe(recipe_id)
@@ -115,6 +146,11 @@ static func on_action(state: CharacterState, activity: Dictionary) -> Dictionary
 		next_reserved = reserve(state, activity)
 	var stopped := order_done or not next_reserved
 	var reason := "Order complete." if order_done else "Out of materials." if not next_reserved else ""
+	if not stopped:
+		activity["time"] = 0.0
+		activity["duration"] = _batch_duration(recipe)
+		activity["heat"] = 100.0
+		activity["work_remaining"] = _work_required(recipe)
 	return {
 		"items": items, "xp": {skill: xp}, "levels": {skill: levels},
 		"stop": stopped, "reason": reason,
