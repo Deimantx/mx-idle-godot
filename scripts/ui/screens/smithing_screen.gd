@@ -2,7 +2,7 @@ extends Control
 
 const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 
-@onready var _tabs: TabContainer = $HBox/Left/LeftVBox/Tabs
+@onready var _tabs: TabContainer = $Page/Body/Browser/BrowserVBox/Tabs
 @onready var _smelt_list: VBoxContainer = %SmeltList
 @onready var _forge_list: VBoxContainer = %ForgeList
 @onready var _search: LineEdit = %RecipeSearch
