@@ -30,7 +30,7 @@ func _ready() -> void:
 	%StopButton.pressed.connect(_stop)
 	_search.text_changed.connect(func(_text: String): _build_lists())
 	_tier_filter.item_selected.connect(func(_index: int): _build_lists())
-		%MakeOneButton.pressed.connect(func(): _start_selected(1))
+	%MakeOneButton.pressed.connect(func(): _start_selected(1))
 	%MakeXButton.pressed.connect(func(): _start_selected(_read_quantity()))
 	%MakeAllButton.pressed.connect(func(): _start_selected(0))
 	_quantity_input.text_submitted.connect(func(_text: String): _start_selected(_read_quantity()))
@@ -282,7 +282,7 @@ func _update_active() -> void:
 			%HeatBar.value = clampf(elapsed / total, 0.0, 1.0)
 			%WorkLabel.text = "BATCH PROCESSING"
 			%WorkBar.value = clampf(elapsed / total, 0.0, 1.0)
-		_active_bar.value = clampf(elapsed / total, 0.0, 1.0
+		_active_bar.value = clampf(elapsed / total, 0.0, 1.0)
 		var rate := int(3600.0 / duration)
 		_rate_label.text = "%s batches / hour" % UiUtil.format_number(rate)
 		var remaining := int(activity.get("batches_remaining", 0))
