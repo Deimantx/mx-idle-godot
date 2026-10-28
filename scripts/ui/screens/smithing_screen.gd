@@ -7,6 +7,7 @@ const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 @onready var _forge_list: VBoxContainer = %ForgeList
 @onready var _search: LineEdit = %RecipeSearch
 @onready var _tier_filter: OptionButton = %TierFilter
+@onready var _forge_category_filter: OptionButton = %ForgeCategoryFilter
 @onready var _available_filter: CheckButton = %AvailableFilter
 @onready var _affordable_filter: CheckButton = %AffordableFilter
 @onready var _locked_filter: CheckButton = %LockedFilter
@@ -26,6 +27,7 @@ func _ready() -> void:
 	%StopButton.pressed.connect(_stop)
 	_search.text_changed.connect(func(_text: String): _build_lists())
 	_tier_filter.item_selected.connect(func(_index: int): _build_lists())
+	_forge_category_filter.item_selected.connect(func(_index: int): _build_lists())
 	_available_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_affordable_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_locked_filter.toggled.connect(func(_pressed: bool): _build_lists())
@@ -76,6 +78,9 @@ func _build_lists() -> void:
 	var query := _search.text.strip_edges().to_lower()
 	var selected_tier := int(_tier_filter.get_item_id(_tier_filter.selected))
 	for recipe in ContentRegistry.recipes_for("smithing"):
+		# Legacy recipes remain in content for old saves, but are not offered to new progression.
+		if bool(recipe.get("legacy", false)):
+			continue
 		var id := str(recipe.get("id", ""))
 		if id.is_empty():
 			continue
@@ -83,6 +88,8 @@ func _build_lists() -> void:
 		if _tabs.current_tab == 0 and not is_smelt:
 			continue
 		if _tabs.current_tab == 1 and is_smelt:
+			continue
+		if _tabs.current_tab == 1 and not _matches_forge_category(recipe):
 			continue
 		if selected_tier > 0 and int(recipe.get("tier", 1)) != selected_tier:
 			continue
@@ -129,6 +136,36 @@ func _build_lists() -> void:
 	if not _recipe_cache.has(detail_id):
 		detail_id = ""
 	_update_detail(detail_id)
+
+
+func _matches_forge_category(recipe: Dictionary) -> bool:
+	var selected := _forge_category_filter.selected
+	if selected <= 0:
+		return true
+	var outputs: Dictionary = recipe.get("output", {})
+	if outputs.is_empty():
+		return selected == 5
+	var output_id := str(outputs.keys()[0])
+	var item: Dictionary = ContentRegistry.get_item(output_id)
+	var category := str(item.get("category", "")).to_lower()
+	var slot := str(item.get("slot", "")).to_lower()
+	var id := output_id.to_lower()
+	var is_tool := category in ["tool", "tools"] or slot == "tool" or "pickaxe" in id or "hammer" in id
+	var is_shield := category in ["shield", "off-hand", "offhand"] or slot in ["off-hand", "offhand", "shield"] or "shield" in id or "bulwark" in id
+	var is_weapon := category in ["weapon", "weapons"] or slot == "weapon" or any(["sword", "axe", "mace", "dagger", "spear", "blade", "club", "hammer_weapon"] .map(func(token): return token in id))
+	var is_armour := category in ["armor", "armour", "helmet", "helm", "body", "legs", "gloves", "boots"] or slot in ["helmet", "head", "body", "chest", "legs", "hands", "feet", "armor", "armour"] or any(["helmet", "helm", "armor", "armour", "plate", "greaves", "gloves", "boots"] .map(func(token): return token in id))
+	match selected:
+		1:
+			return is_weapon and not is_tool and not is_shield
+		2:
+			return is_armour and not is_shield and not is_tool
+		3:
+			return is_shield
+		4:
+			return is_tool
+		5:
+			return not is_weapon and not is_armour and not is_shield and not is_tool
+	return true
 
 
 func _on_recipe_selected(recipe_id: String) -> void:
