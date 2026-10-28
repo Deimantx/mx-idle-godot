@@ -31,14 +31,21 @@ func _ready() -> void:
 	_available_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_affordable_filter.toggled.connect(func(_pressed: bool): _build_lists())
 	_locked_filter.toggled.connect(func(_pressed: bool): _build_lists())
-	_tabs.tab_changed.connect(func(_index: int): _build_lists())
+	_tabs.tab_changed.connect(func(_index: int):
+		_sync_category_filter()
+		_build_lists())
 	EventBus.activity_changed.connect(_on_activity_changed)
 	EventBus.level_up.connect(func(_skill: String, _level: int): _build_lists())
 	EventBus.bank_changed.connect(_on_bank_changed)
 	EventBus.profile_loaded.connect(refresh)
 	EventBus.state_changed.connect(_update_active)
+	_sync_category_filter()
 	_build_lists()
 	_update_active()
+
+
+func _sync_category_filter() -> void:
+	_forge_category_filter.visible = _tabs.current_tab == 1
 
 
 func refresh() -> void:
