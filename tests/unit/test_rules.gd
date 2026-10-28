@@ -202,16 +202,36 @@ func test_combat_loop() -> void:
 	assert(state.gold > gold_before, "kills grant gold")
 	assert(respawned_full, "enemy respawns at full HP on death")
 
-func test_smithing_finite_batch_order() -> void:
+
+func test_smithing_quantity_modes_and_atomic_cancel() -> void:
 	var state := _make_state()
-	InventorySystem.add(state, "item.ore.copper", 10)
-	InventorySystem.add(state, "item.ore.tin", 10)
-	var act := CraftingSystem.make_activity(state, "recipe.smithing.smelt.bronze", 2)
-	act["finite_order"] = true
-	assert(int(act.get("batches_remaining", 0)) == 2, "finite order stores requested batch count")
-	var first := CraftingSystem.on_action(state, act)
-	assert(not first.get("stop", false), "finite order continues before final batch")
-	var second := CraftingSystem.on_action(state, act)
-	assert(second.get("stop", false), "finite order stops after requested batch count")
-	assert(second.get("reason", "") == "Order complete.", "finite order reports completion")
-	CraftingSystem.return_reserved(state, act)
+	InventorySystem.add(state, "item.ore.copper", 12)
+	InventorySystem.add(state, "item.ore.tin", 12)
+	var recipe_id := "recipe.smithing.smelt.bronze"
+	var exact := CraftingSystem.make_activity(state, recipe_id, 2)
+	assert(int(exact.get("batches_requested", 0)) == 2, "chosen quantity stored")
+	assert(InventorySystem.count(state, "item.ore.copper") == 11, "only current batch is reserved")
+	CraftingSystem.return_reserved(state, exact)
+	assert(InventorySystem.count(state, "item.ore.copper") == 12, "cancel returns reserved inputs")
+	assert(int(exact.get("batches_completed", 0)) == 0, "cancelled partial batch grants no completion")
+	var all := CraftingSystem.make_activity(state, recipe_id, -1)
+	assert(int(all.get("batches_requested", 0)) == 12, "all mode counts affordable batches across all inputs")
+	assert(int(all.get("batches_remaining", 0)) == 12, "all mode stores finite remaining count")
+	CraftingSystem.return_reserved(state, all)
+	var indefinite := CraftingSystem.make_activity(state, recipe_id, 0)
+	assert(str(indefinite.get("production_mode", "")) == "indefinite", "indefinite mode is saved in activity")
+	CraftingSystem.return_reserved(state, indefinite)
+
+
+func test_smithing_forge_category_coverage() -> void:
+	var recipes := ContentData.build_recipes()
+	var expected := {"weapon": false, "shield": false, "helmet": false, "body_armor": false, "leg_armor": false, "gloves": false, "boots": false, "tool": false}
+	for recipe_id in recipes:
+		var recipe: Dictionary = recipes[recipe_id]
+		if str(recipe.get("kind", "")) != "forge":
+			continue
+		var category := str(recipe.get("forge_category", ""))
+		if expected.has(category):
+			expected[category] = true
+	for category in expected:
+		assert(bool(expected[category]), "Forge has category coverage for %s" % category)

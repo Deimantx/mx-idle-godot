@@ -52,17 +52,17 @@ const SMELT_INPUTS := {
 
 # Forge templates: kind -> slot / bar cost / item id segment.
 const FORGE_TEMPLATES := [
-	{"kind": "pickaxe", "slot": "tool", "bars": 3, "id_seg": "tool.pickaxe", "label": "Pickaxe"},
-	{"kind": "rod", "slot": "tool", "bars": 3, "id_seg": "tool.rod", "label": "Rod"},
-	{"kind": "sword", "slot": "weapon", "bars": 2, "id_seg": "weapon.sword", "label": "Sword", "damage_type": "slash"},
-	{"kind": "spear", "slot": "weapon", "bars": 2, "id_seg": "weapon.spear", "label": "Spear", "damage_type": "stab"},
-	{"kind": "mace", "slot": "weapon", "bars": 3, "id_seg": "weapon.mace", "label": "Mace", "damage_type": "crush"},
-	{"kind": "shield", "slot": "off_hand", "bars": 2, "id_seg": "offhand.shield", "label": "Shield"},
+	{"kind": "pickaxe", "slot": "tool", "bars": 3, "id_seg": "tool.pickaxe", "label": "Pickaxe", "forge_category": "tool"},
+	{"kind": "rod", "slot": "tool", "bars": 3, "id_seg": "tool.rod", "label": "Rod", "forge_category": "tool"},
+	{"kind": "sword", "slot": "weapon", "bars": 2, "id_seg": "weapon.sword", "label": "Sword", "forge_category": "weapon", "damage_type": "slash"},
+	{"kind": "spear", "slot": "weapon", "bars": 2, "id_seg": "weapon.spear", "label": "Spear", "forge_category": "weapon", "damage_type": "stab"},
+	{"kind": "mace", "slot": "weapon", "bars": 3, "id_seg": "weapon.mace", "label": "Mace", "forge_category": "weapon", "damage_type": "crush"},
+	{"kind": "shield", "slot": "off_hand", "bars": 2, "id_seg": "offhand.shield", "label": "Shield", "forge_category": "shield"},
 	{"kind": "helm", "slot": "head", "bars": 2, "id_seg": "armor.helm", "label": "Helmet", "forge_category": "helmet"},
-	{"kind": "body", "slot": "body", "bars": 3, "id_seg": "armor.body", "label": "Body Armor"},
-	{"kind": "legs", "slot": "legs", "bars": 3, "id_seg": "armor.legs", "label": "Leg Armor"},
-	{"kind": "gloves", "slot": "hands", "bars": 2, "id_seg": "armor.gloves", "label": "Gloves"},
-	{"kind": "boots", "slot": "feet", "bars": 2, "id_seg": "armor.boots", "label": "Boots"},
+	{"kind": "body", "slot": "body", "bars": 3, "id_seg": "armor.body", "label": "Body Armor", "forge_category": "body_armor"},
+	{"kind": "legs", "slot": "legs", "bars": 3, "id_seg": "armor.legs", "label": "Leg Armor", "forge_category": "leg_armor"},
+	{"kind": "gloves", "slot": "hands", "bars": 2, "id_seg": "armor.gloves", "label": "Gloves", "forge_category": "gloves"},
+	{"kind": "boots", "slot": "feet", "bars": 2, "id_seg": "armor.boots", "label": "Boots", "forge_category": "boots"},
 ]
 
 # Fish species, one per tier. Raw catch and its cooked form.
@@ -161,6 +161,10 @@ static func build_items() -> Dictionary:
 					stats = {"defense_bonus": tier * 2}
 				"legs":
 					stats = {"defense_bonus": tier}
+				"gloves", "boots":
+					stats = {"defense_bonus": maxi(1, int(tier / 2))}
+				"shield":
+					stats = {"defense_bonus": tier, "block_bonus": tier}
 			out[item_id] = {
 				"id": item_id,
 				"name": str(bar["name"]).replace(" Bar", "") + " " + str(tmpl["label"]),
@@ -226,7 +230,7 @@ static func build_recipes() -> Dictionary:
 				"name": "Forge " + str(out_item_name(item_id, out)) ,
 				"profession": "smithing",
 				"kind": "forge",
-				"forge_category": str(tmpl.get("forge_category", "shield" if str(tmpl["kind"]) == "shield" else "tool" if str(tmpl["slot"]) == "tool" else "weapon" if str(tmpl["slot"]) == "weapon" else "armor")),
+				"forge_category": str(tmpl.get("forge_category", "other")),
 				"item_slot": str(tmpl["slot"]),
 				"inputs": {"item.bar." + bid: int(tmpl["bars"])},
 				"output": {item_id: 1},

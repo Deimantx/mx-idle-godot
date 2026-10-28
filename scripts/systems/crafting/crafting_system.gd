@@ -1,85 +1,123 @@
 class_name CraftingSystem
 extends RefCounted
 
-## Generic crafting for level-gated recipes (Smithing, Cooking, ...). Inputs are
-## RESERVED (moved out of the bank) when an activity starts and on every
-## completed batch; reserved inputs are returned to the bank if the player stops.
-## The recipe's authored profession decides which skill gains XP. No fake outputs.
+## Shared timed production resolver. One batch is reserved while its timer runs.
+## Completion consumes inputs and grants outputs + XP together. Cancellation
+## returns reserved inputs and discards partial timer progress.
 
 
 static func can_start(state: CharacterState, recipe_id: String) -> Dictionary:
-	# validates level gate + material availability
 	var recipe := ContentRegistry.get_recipe(recipe_id)
 	if recipe.is_empty():
 		return {"ok": false, "reason": "Unknown recipe."}
-	var skill := str(recipe["profession"])
-	var level := state.get_level(skill)
-	if level < int(recipe["level"]):
-		return {"ok": false, "reason": "Requires %s %d." % [skill.capitalize(), int(recipe["level"])]}
-	if not InventorySystem.has_all(state, recipe["inputs"]):
+	var inputs: Dictionary = recipe.get("inputs", {})
+	var outputs: Dictionary = recipe.get("output", {})
+	if inputs.is_empty() or outputs.is_empty():
+		return {"ok": false, "reason": "Recipe has no valid inputs or outputs."}
+	for item_id in inputs:
+		if int(inputs[item_id]) <= 0 or ContentRegistry.get_item(str(item_id)).is_empty():
+			return {"ok": false, "reason": "Recipe contains invalid input materials."}
+	for item_id in outputs:
+		if int(outputs[item_id]) <= 0 or ContentRegistry.get_item(str(item_id)).is_empty():
+			return {"ok": false, "reason": "Recipe contains invalid output items."}
+	var skill := str(recipe.get("profession", ""))
+	var required_level := int(recipe.get("level", 1))
+	if skill.is_empty() or required_level < 1 or required_level > 100:
+		return {"ok": false, "reason": "Recipe has invalid profession requirements."}
+	if state.get_level(skill) < required_level:
+		return {"ok": false, "reason": "Requires %s %d." % [skill.capitalize(), required_level]}
+	if not InventorySystem.has_all(state, inputs):
 		return {"ok": false, "reason": "Missing materials."}
 	return {"ok": true, "reason": ""}
 
 
+## batch_count: positive = exact count, -1 = all affordable batches, 0 = indefinite.
 static func make_activity(state: CharacterState, recipe_id: String, batch_count: int = 0) -> Dictionary:
 	var recipe := ContentRegistry.get_recipe(recipe_id)
-	var act := {
-		"type": str(recipe["profession"]),
-		"target": recipe_id,
-		"time": 0.0,
-		"duration": float(recipe["time"]),
+	if recipe.is_empty():
+		return {}
+	var requested := max_possible_batches(state, recipe_id) if batch_count == -1 else batch_count
+	var finite_order := batch_count != 0
+	var activity := {
+		"type": str(recipe["profession"]), "target": recipe_id,
+		"time": 0.0, "duration": maxf(0.05, float(recipe.get("time", 1.0))),
 		"reserved": {},
-		# 0 means keep producing until materials run out; positive values are finite orders.
-		"batches_remaining": maxi(0, batch_count),
-		"finite_order": batch_count > 0,
-		"batches_completed": 0,
+		"production_mode": "indefinite" if batch_count == 0 else "all" if batch_count == -1 else "quantity",
+		"batches_requested": maxi(0, requested),
+		"batches_remaining": maxi(0, requested),
+		"batches_completed": 0, "finite_order": finite_order,
 	}
-	reserve(state, act)
-	return act
+	if finite_order and requested <= 0:
+		return {}
+	if not reserve(state, activity):
+		return {}
+	return activity
 
 
-## Reserve one batch of inputs. Returns false (and reserves nothing) if the
-## bank cannot cover a full batch.
-static func reserve(state: CharacterState, act: Dictionary) -> bool:
-	var recipe := ContentRegistry.get_recipe(str(act["target"]))
-	if not InventorySystem.remove_all(state, recipe["inputs"]):
+static func max_possible_batches(state: CharacterState, recipe_id: String) -> int:
+	var recipe := ContentRegistry.get_recipe(recipe_id)
+	if recipe.is_empty():
+		return 0
+	var inputs: Dictionary = recipe.get("inputs", {})
+	if inputs.is_empty():
+		return 0
+	var possible := 2147483647
+	for item_id in inputs:
+		var per_batch := int(inputs[item_id])
+		if per_batch <= 0:
+			return 0
+		possible = mini(possible, int(InventorySystem.count(state, str(item_id)) / per_batch))
+	return maxi(0, possible)
+
+
+static func reserve(state: CharacterState, activity: Dictionary) -> bool:
+	if not (activity.get("reserved", {}) as Dictionary).is_empty():
 		return false
-	act["reserved"] = (recipe["inputs"] as Dictionary).duplicate()
+	var recipe := ContentRegistry.get_recipe(str(activity.get("target", "")))
+	if recipe.is_empty():
+		return false
+	var inputs: Dictionary = recipe.get("inputs", {})
+	if inputs.is_empty() or not InventorySystem.remove_all(state, inputs):
+		return false
+	activity["reserved"] = inputs.duplicate(true)
 	return true
 
 
-static func return_reserved(state: CharacterState, act: Dictionary) -> void:
-	var reserved: Dictionary = act.get("reserved", {})
-	for item_id in reserved.keys():
-		InventorySystem.add(state, item_id, int(reserved[item_id]))
-	act["reserved"] = {}
+static func return_reserved(state: CharacterState, activity: Dictionary) -> void:
+	var reserved: Dictionary = activity.get("reserved", {})
+	for item_id in reserved:
+		InventorySystem.add(state, str(item_id), int(reserved[item_id]))
+	activity["reserved"] = {}
 
 
-static func on_action(state: CharacterState, act: Dictionary) -> Dictionary:
-	var recipe := ContentRegistry.get_recipe(str(act["target"]))
+static func on_action(state: CharacterState, activity: Dictionary) -> Dictionary:
+	var recipe := ContentRegistry.get_recipe(str(activity.get("target", "")))
+	if recipe.is_empty():
+		return {"stop": true, "reason": "Recipe no longer exists."}
+	var reserved: Dictionary = activity.get("reserved", {})
+	if reserved.is_empty():
+		return {"stop": true, "reason": "No reserved materials for this batch."}
+	activity["reserved"] = {}
+	var items: Dictionary = {}
+	for item_id in recipe["output"]:
+		var amount := int(recipe["output"][item_id])
+		InventorySystem.add(state, str(item_id), amount)
+		items[str(item_id)] = amount
 	var skill := str(recipe["profession"])
-	# Inputs were already removed from the bank at reserve time: consume them.
-	act["reserved"] = {}
-
-	var items := {}
-	for item_id in recipe["output"].keys():
-		var amt := int(recipe["output"][item_id])
-		InventorySystem.add(state, item_id, amt)
-		items[item_id] = amt
-
-	var xp := int(recipe["xp"])
-	act["batches_completed"] = int(act.get("batches_completed", 0)) + 1
-	if int(act.get("batches_remaining", 0)) > 0:
-		act["batches_remaining"] = int(act["batches_remaining"]) - 1
+	var xp := int(recipe.get("xp", 0))
+	activity["batches_completed"] = int(activity.get("batches_completed", 0)) + 1
+	if bool(activity.get("finite_order", false)):
+		activity["batches_remaining"] = maxi(0, int(activity.get("batches_remaining", 0)) - 1)
 	var levels := state.add_xp(skill, xp)
-
-	# Start the next batch; stop the activity when materials run out.
-	var finite_order_done := int(act.get("batches_remaining", 0)) == 0 and bool(act.get("finite_order", false))
-	var stopped := finite_order_done or not reserve(state, act)
+	var order_done := bool(activity.get("finite_order", false)) and int(activity["batches_remaining"]) <= 0
+	var next_reserved := false
+	if not order_done:
+		next_reserved = reserve(state, activity)
+	var stopped := order_done or not next_reserved
+	var reason := "Order complete." if order_done else "Out of materials." if not next_reserved else ""
 	return {
-		"items": items,
-		"xp": {skill: xp},
-		"levels": {skill: levels},
-		"stop": stopped,
-		"reason": ("Order complete." if finite_order_done else "Out of materials.") if stopped else "",
+		"items": items, "xp": {skill: xp}, "levels": {skill: levels},
+		"stop": stopped, "reason": reason,
+		"production": {"recipe_id": str(recipe["id"]), "batch_completed": int(activity["batches_completed"]),
+			"batches_remaining": int(activity.get("batches_remaining", 0)), "mode": str(activity.get("production_mode", "indefinite"))},
 	}

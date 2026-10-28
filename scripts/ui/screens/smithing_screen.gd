@@ -22,7 +22,7 @@ const ListEntryScene := preload("res://scenes/ui/components/ListEntry.tscn")
 var _selected: String = ""
 var _rows: Dictionary = {}
 var _recipe_cache: Dictionary = {}
-var _batch_count_by_id := {0: 1, 1: 5, 2: 10, 3: 0}
+var _batch_count_by_id := {0: 1, 1: 5, 2: 10, 3: -1, 4: 0}
 
 
 func _ready() -> void:
@@ -70,7 +70,7 @@ func _on_bank_changed() -> void:
 func _update_batch_hint() -> void:
 	# Kept separate so the amount selector can be refreshed without rebuilding recipes.
 	if is_instance_valid(_batch_amount):
-		_batch_amount.tooltip_text = ["One batch", "Five batches", "Ten batches", "Continue until materials run out"][_batch_amount.selected]
+		_batch_amount.tooltip_text = ["One batch", "Five batches", "Ten batches", "All currently possible batches", "Continue until materials run out"][_batch_amount.selected]
 
 
 func _stop() -> void:
@@ -158,37 +158,17 @@ func _matches_forge_category(recipe: Dictionary) -> bool:
 	var selected := _forge_category_filter.selected
 	if selected <= 0:
 		return true
-	var explicit_category := str(recipe.get("forge_category", "")).to_lower()
-	if not explicit_category.is_empty():
-		match selected:
-			1: return explicit_category == "weapon"
-			2: return explicit_category in ["armor", "helmet", "gloves", "boots"]
-			3: return explicit_category == "shield"
-			4: return explicit_category == "tool"
-			5: return explicit_category == "other"
-	var outputs: Dictionary = recipe.get("output", {})
-	if outputs.is_empty():
-		return selected == 5
-	var output_id := str(outputs.keys()[0])
-	var item: Dictionary = ContentRegistry.get_item(output_id)
-	var category := str(item.get("category", "")).to_lower()
-	var slot := str(item.get("equip_slot", "")).to_lower()
-	var id := output_id.to_lower()
-	var is_tool := category in ["tool", "tools"] or slot == "tool" or "pickaxe" in id or "hammer" in id
-	var is_shield := category in ["shield", "off-hand", "offhand"] or slot in ["off-hand", "offhand", "shield"] or "shield" in id or "bulwark" in id
-	var is_weapon := category in ["weapon", "weapons"] or slot == "weapon" or _id_has_any(id, ["sword", "axe", "mace", "dagger", "spear", "blade", "club"])
-	var is_armour := category in ["armor", "armour", "helmet", "helm", "body", "legs", "gloves", "boots"] or slot in ["helmet", "head", "body", "chest", "legs", "hands", "feet", "armor", "armour"] or _id_has_any(id, ["helmet", "helm", "armor", "armour", "plate", "greaves", "gloves", "boots"])
+	var category := str(recipe.get("forge_category", "other")).to_lower()
 	match selected:
-		1:
-			return is_weapon and not is_tool and not is_shield
-		2:
-			return is_armour and not is_shield and not is_tool
-		3:
-			return is_shield
-		4:
-			return is_tool
-		5:
-			return not is_weapon and not is_armour and not is_shield and not is_tool
+		1: return category == "weapon"
+		2: return category == "shield"
+		3: return category == "helmet"
+		4: return category == "body_armor"
+		5: return category == "leg_armor"
+		6: return category == "gloves"
+		7: return category == "boots"
+		8: return category == "tool"
+		9: return category == "other"
 	return true
 
 
@@ -277,7 +257,9 @@ func _update_active() -> void:
 		_rate_label.text = "%s batches / hour" % UiUtil.format_number(rate)
 		var remaining := int(activity.get("batches_remaining", 0))
 		if bool(activity.get("finite_order", false)):
-			_rate_label.text += "  ·  %d left" % remaining
+			_rate_label.text += "  ·  %d / %d left" % [remaining, int(activity.get("batches_requested", remaining))]
+		else:
+			_rate_label.text += "  ·  INDEFINITE"
 		%StopButton.disabled = false
 		%ProgressCaption.text = "BATCH %d%% COMPLETE" % int(_active_bar.value * 100.0)
 	_update_detail(_selected if not _selected.is_empty() else recipe_id)
@@ -312,6 +294,7 @@ func _update_detail(recipe_id: String) -> void:
 	lines.append("REQUIRED LEVEL|%d" % int(recipe.get("level", 1)))
 	lines.append("PRODUCTION TIME|%.1f seconds" % float(recipe.get("time", 0.0)))
 	lines.append("SMITHING XP|%d per batch" % int(recipe.get("xp", 0)))
+	lines.append("PRODUCTION MODE|%s" % ["One batch", "Five batches", "Ten batches", "All possible", "Indefinite"][_batch_amount.selected])
 	var description := ""
 	if not outputs.is_empty():
 		description = str(ContentRegistry.get_item(str(outputs.keys()[0])).get("description", ""))

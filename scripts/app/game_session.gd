@@ -91,6 +91,8 @@ func start_activity(type: String, target: String, batch_count: int = 0) -> Dicti
 			state.activity = FishingSystem.make_activity(state, target)
 		"smithing", "cooking":
 			state.activity = CraftingSystem.make_activity(state, target, batch_count)
+			if state.activity.is_empty():
+				return {"ok": false, "reason": "Unable to reserve materials for this production order."}
 		"combat":
 			state.activity = CombatSystem.make_activity(state, target)
 	state.activity["started_unix"] = int(Time.get_unix_time_from_system())
